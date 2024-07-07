@@ -168,7 +168,7 @@
     - Informe de progreso del proyecto, informe de actividad del usuario, etc.
 - **Datos que se incluirán en el informe:**
     - Tareas completadas, tareas en curso, hitos alcanzados, tiempo dedicado por usuario, etc.
-- **Formato del informe:**   
+- **Formato del informe:** 
     - PDF, Excel, CSV, etc.
 
 # **5. Notificaciones y recordatorios:**
