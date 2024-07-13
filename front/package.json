@@ -1,0 +1,21 @@
+{
+  "name": "aion-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "core-js": "^3.37.1",
+    "nuxt": "^3.12.3",
+    "primevue": "^4.0.0",
+    "primeicons": "^7.0.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.1",
+    "postcss": "^8.4.39"
+  }
+}
