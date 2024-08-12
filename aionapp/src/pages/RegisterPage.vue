@@ -61,10 +61,10 @@
       const onSubmit = async (formData) => {
               try {
                 const response = await apiPost('/register/', formData)
-                const { accessToken, refreshToken, user, ts } = response
-                setToken(accessToken)
-                setRefreshToken(refreshToken)
-                $q.cookies.set('user', user, { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
+                const { refresh, access, user, ts } = response
+                setToken(access)
+                setRefreshToken(refresh)
+                $q.localStorage.setItem('user', JSON.stringify(user))
                 router.push(`/home/${user}`)              
               } catch (error) {
                 console.error('Registration failed', error)

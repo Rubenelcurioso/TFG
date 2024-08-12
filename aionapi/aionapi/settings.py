@@ -49,15 +49,17 @@ INSTALLED_APPS = [
     'rest_framework', # Django Rest Framework
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'api',  # Django app
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+AUTH_USER_MODEL = 'api.User' # To be used for auth rest framework
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),

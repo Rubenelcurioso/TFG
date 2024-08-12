@@ -79,7 +79,6 @@
       }
   
       const onSubmit = () => {
-        console.log(formRef)
         const isValid = formRef.value.validate()
         if (isValid) {
           emit('submit', formData)

@@ -1,5 +1,5 @@
 import { api } from 'boot/axios';
-import { getValidToken } from './token-management';
+import { getValidToken, getRefreshToken } from './token-management';
 
 /**
  * Sends a GET request to the specified URL with the provided configuration.
@@ -42,10 +42,13 @@ export async function apiPost(url, data, config = {}) {
       const token = await getValidToken();
       headers.Authorization = `Bearer ${token}`;
     }
+    if (url === '/logout/') data.rTkn = getRefreshToken(); // Add refresh token to the request data
+
     const response = await api.post(url, data, {
       ...config,
       headers
     });
+
     return response.data;
   } catch (error) {
     handleApiError(error);

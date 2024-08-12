@@ -1,6 +1,5 @@
 import { api } from 'boot/axios';
 import { useRouter } from 'vue-router';
-import { Cookies } from 'quasar'
 import { LocalStorage } from 'quasar';
 
 
@@ -24,11 +23,11 @@ export function getToken() {
  */
 export function setToken(token) {
   LocalStorage.set(TOKEN_KEY, token);
-  LocalStorage.set('ts', Date.now());
+  LocalStorage.set('tsa', Date.now());
 }
 
 export function getRefreshToken() {
-  return Cookies.get(REFRESH_TOKEN_KEY);
+  return LocalStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
 /**
@@ -37,9 +36,10 @@ export function getRefreshToken() {
  * @param {string} refreshToken - The refresh token to be stored.
  */
 export function setRefreshToken(refreshToken) { // Change here Cookie secure when get the HTTPS certs
-  Cookies.set(REFRESH_TOKEN_KEY, refreshToken, { path: '/', secure: false, httpOnly: true, sameSite: 'Strict', expires: new Date(Date.now() + 1000 * 60 * 60 * 24) });
-  Cookies.set('ts', Date.now(), { path: '/', secure: false, httpOnly: true, sameSite: 'Strict', expires: new Date(Date.now() + 1000 * 60 * 60 * 24) });
+  LocalStorage.set(REFRESH_TOKEN_KEY, refreshToken);
+  LocalStorage.set('tsr', Date.now());
 }
+
 
 /**
  * Gets the timestamp when the refresh token was set.
@@ -47,7 +47,7 @@ export function setRefreshToken(refreshToken) { // Change here Cookie secure whe
  * @returns {number} The timestamp (in milliseconds) when the refresh token was set.
  */
 export function getTimestampRefreshToken(){
-    return Cookies.get('ts');
+    return LocalStorage.getItem('tsr');
 }
 
 /**
@@ -56,7 +56,7 @@ export function getTimestampRefreshToken(){
  * @returns {number} The timestamp (in milliseconds) when the access token was set.
  */
 export function getTimestampToken(){
-    return LocalStorage.getItem('ts');
+    return LocalStorage.getItem('tsa');
 }
 
 /**
@@ -65,8 +65,9 @@ export function getTimestampToken(){
  */
 export function removeTokens() {
   LocalStorage.clear();
-  Cookies.remove(REFRESH_TOKEN_KEY);
-  Cookies.remove('ts');
+  LocalStorage.remove(REFRESH_TOKEN_KEY);
+  LocalStorage.remove('tsa');
+  LocalStorage.remove('tsr');
 }
 
 /**
@@ -111,9 +112,9 @@ export async function refreshToken() {
     const refreshToken = getRefreshToken();
     if(!isTokenExpired(refreshToken, getTimestampRefreshToken(), '1d')){
       const response = await api.post('/token/refresh/', { refreshToken });
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-      setToken(response.data.access_token);
-      setRefreshToken(response.data.refresh_token);
+      const { access, refresh } = response.data;
+      setToken(access);
+      setRefreshToken(refresh);
       return accessToken;
     }else{
       removeTokens();

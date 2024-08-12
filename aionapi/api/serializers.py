@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from .models import User, Business, Team, Employee, Project, Role, Task, UserProjectRole
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
+
+AuthUser = get_user_model()
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required=True)
@@ -16,7 +18,9 @@ class UserLoginSerializer(serializers.Serializer):
         username = data.get('username')
         password = data.get('password')
         user = User.objects.filter(username=username).first()
-        if user and user.check_password(password):
+        user = authenticate(username=username, password=password)
+        # user and user.check_password(password)
+        if user:
             return user
         else:
             raise serializers.ValidationError('Invalid credentials')
@@ -40,24 +44,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password2')
         user = User.objects.create_user(**validated_data)
+        AuthUser.objects.create_user(username=user.username, password=validated_data['password'], is_superuser=False, is_staff=False)        
         return user
 
-class UserSerializer(serializers.ModelSerializer):
-        password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-        password2 = serializers.CharField(write_only=True, required=True)
-        class Meta:
-            model = User
-            fields = ['id', 'username', 'email', 'fullname', 'birthday', 'phone', 'password', 'password2']
-
-        def validate(self, attrs):
-            if attrs['password'] != attrs['password2']: # Password 2 is 2nd input of password when creating an user
-                raise serializers.ValidationError({"password": "Password fields didn't match."})
-            return attrs
-
-        def create(self, validated_data):
-            validated_data.pop('password2')
-            user = User.objects.create_user(**validated_data)
-            return user
 
 class BusinessSerializer(serializers.ModelSerializer):
     class Meta:

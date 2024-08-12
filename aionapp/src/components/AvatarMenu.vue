@@ -19,7 +19,10 @@
   <script>
  import { useQuasar } from 'quasar'
  import { useRouter } from 'vue-router'
- import { api } from 'boot/axios'
+ import { apiPost } from '../utils/api-wrapper'
+ import { removeTokens } from '../utils/token-management'
+
+
   export default {
     name: 'AvatarMenu',
     setup() {
@@ -31,17 +34,14 @@
       const $q = useQuasar()
       const router = useRouter()
 
-      const logout = () => {
-        const rTkn = $q.cookies.get('rTkn')
-        api.post('/logout/', { refreshToken: rTkn })
-          .then(() => {
-            localStorage.user = ''
-            router.push('/login')
-          })
-          .catch(err => {
-            console.error('Error logging out:', err)
-          })
-
+      const logout = async () => {
+        try {
+          const response = await apiPost('/logout/', {})
+          removeTokens()
+          router.push('/login')
+        } catch (error) {
+          console.error('Logout failed', error)
+        }
       }
   
       return {

@@ -18,12 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from api.views import UserLogout, UserRegistration, UserLogin, UserList, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
+from api.views import UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
 urlpatterns = [
     path('register/', UserRegistration.as_view(), name='register'),
     path('login/', UserLogin.as_view(), name='login'),
     path('logout/', UserLogout.as_view(), name='logout'),
-    path('users/', UserList.as_view(), name='user-list'),
     path('businesses/', BusinessList.as_view(), name='business-list'),
     path('teams/', TeamList.as_view(), name='team-list'),
     path('employees/', EmployeeList.as_view(), name='employee-list'),
