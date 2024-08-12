@@ -1,25 +1,24 @@
 <template>
-    <q-page class="flex flex-center bg-primary" >
-      <AuthForm
-        title="Registration"
-        subtitle="Create your account"
-        :fields="fields"
-        submit-label="Register"
-        v-model="formData"
-        @submit="onSubmit"
-      />
-    </q-page>
-  </template>
-  
-  <script>
+  <q-page class="flex flex-center bg-primary" >
+    <AuthForm
+      title="Registration"
+      subtitle="Create your account"
+      :fields="fields"
+      submit-label="Register"
+      v-model="formData"
+      @submit="onSubmit"
+    />
+  </q-page>
+</template>
+
+<script>
   import { defineComponent } from 'vue'
   import AuthForm from 'components/AuthForm.vue'
-  import { api } from 'boot/axios'
-  import { formToJSON } from 'axios';
   import { useQuasar } from 'quasar'
   import { useRouter } from 'vue-router'
+  import { apiPost } from '../utils/api-wrapper'
+  import { setToken, setRefreshToken } from '../utils/token-management'
 
-  
   export default defineComponent({
     name: 'RegisterPage',
     components: { AuthForm },
@@ -61,24 +60,19 @@
 
       const onSubmit = async (formData) => {
               try {
-                const response = await api.post('/register/', formData)
-                const { accessToken, refreshToken, user } = response.data
-                // secure cookie subject to change when adquire certifieds for HTTPS
-                // NEED TO CHANGE THE OPTION ASAP have HTTPS certs
-                $q.cookies.set('aTknlt', '15m', { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
-                $q.cookies.set('rTknlt', '1440m', { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
-                $q.cookies.set('rTkn', refreshToken, { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
+                const response = await apiPost('/register/', formData)
+                const { accessToken, refreshToken, user, ts } = response
+                setToken(accessToken)
+                setRefreshToken(refreshToken)
                 $q.cookies.set('user', user, { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
-                $q.localStorage.set('ts', ts)
-                $q.localStorage.set('aTkn', accessToken)
                 router.push(`/home/${user}`)              
               } catch (error) {
                 console.error('Registration failed', error)
                 alert('Registration failed: ' + (error.response?.data?.message || error.message))
               }
       }
-  
+
       return { fields, onSubmit }
     }
   })
-  </script>
+</script>

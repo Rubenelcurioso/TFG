@@ -14,9 +14,10 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import AuthForm from 'components/AuthForm.vue'
-import { api } from 'boot/axios'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
+import { apiPost } from '../utils/api-wrapper'
+import { setToken, setRefreshToken } from '../utils/token-management'
 
 export default defineComponent({
   name: 'LoginPage',
@@ -34,18 +35,13 @@ export default defineComponent({
 
     const onSubmit = async (formData) => {
       try {
-        const response = await api.post('/login/', formData)
-        const { accessToken, refreshToken, user, ts } = response.data
-        // secure cookie subject to change when adquire certifieds for HTTPS
-        // NEED TO CHANGE THE OPTION ASAP have HTTPS certs
-        $q.cookies.set('aTknlt', '15m', { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
-        $q.cookies.set('rTknlt', '1440m', { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
-        $q.cookies.set('rTkn', refreshToken, { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
+        const response = await apiPost('/login/', formData)
+        const { accessToken, refreshToken, user, ts } = response
+        setToken(accessToken)
+        setRefreshToken(refreshToken)
         $q.cookies.set('user', user, { path: '/', secure: false, httpOnly: true, sameSite: 'Strict' })
-        $q.localStorage.set('ts', ts)
-        $q.localStorage.set('aTkn', accessToken) 
         router.push(`/home/${user}`)    
-        } catch (error) {
+      } catch (error) {
         console.error('Login failed', error)
         errorMessage.value = 'Login failed: ' + (error.response?.data?.message || error.message)
       }
