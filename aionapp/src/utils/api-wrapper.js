@@ -1,5 +1,5 @@
 import { api } from 'boot/axios';
-import { getValidToken, getRefreshToken } from './token-management';
+import { setToken, setRefreshToken, getValidToken, getRefreshToken } from './token-management';
 
 /**
  * Sends a GET request to the specified URL with the provided configuration.
@@ -110,13 +110,29 @@ export async function apiDelete(url, config = {}) {
  * @param {Error} error - The error object containing information about the API request failure.
  * @throws {Error} - The original error object.
  */
-function handleApiError(error) {
-  if (error.response) {
+async function handleApiError(error) {
+  // Check if token access has expired
+  // The localStorage is checked only if the app is running in the browser
+  if (error.response.data.messages[0].token_type === "access" && 
+    error.response.data.messages[0].message === "Token is invalid or expired") {
+    console.error('Access token has expired');
+    // Refresh the token
+    try {
+      const response = await api.post('/token/refresh/', { refreshToken: getRefreshToken() });
+      const { access, refresh } = response.data;
+      setToken(access);
+      setRefreshToken(refresh);
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      throw error;
+    }
+  }
+  else if (error.response) {
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
     console.error('API Error:', error.response.data);
     console.error('Status:', error.response.status);
-    console.error('Headers:', error.response.headers);
+    console.error('Headers:', error.response.headers);    
   } else if (error.request) {
     // The request was made but no response was received
     console.error('No response received:', error.request);

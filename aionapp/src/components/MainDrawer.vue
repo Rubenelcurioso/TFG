@@ -3,43 +3,66 @@
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
       show-if-above
-      bordered
       dark
       content-class="bg-primary"
     >
-      <q-list>
-        <q-item-label header class="text-grey-8">Navigation</q-item-label>
-        <q-item clickable v-ripple>
-          <q-item-section avatar>
-            <q-icon name="inbox" />
-          </q-item-section>
-          <q-item-section>Inbox</q-item-section>
-        </q-item>
-        <q-item clickable v-ripple>
-          <q-item-section avatar>
-            <q-icon name="star" />
-          </q-item-section>
-          <q-item-section>Star</q-item-section>
-        </q-item>
-        <q-item clickable v-ripple>
-          <q-item-section avatar>
-            <q-icon name="send" />
-          </q-item-section>
-          <q-item-section>Send</q-item-section>
-        </q-item>
-      </q-list>
+      <q-scroll-area class="fit">
+          <q-list dense padding class="menu-list">
+          <q-item active clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}`">            
+            <q-item-section avatar>
+              <q-icon name="home" />
+            </q-item-section>
+            <q-item-section>Home</q-item-section>
+          </q-item>
+
+          <q-separator dark spaced inset/>
+          <ProjectsItem />
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="business" />
+            </q-item-section>
+            <q-item-section>Business</q-item-section>            
+          </q-item>
+
+
+          <q-separator dark spaced inset/>
+
+          <q-item clickable v-ripple @click="openGithub">
+            <q-item-section avatar>
+              <q-icon name="star" />
+            </q-item-section>
+            <q-item-section>Rate us</q-item-section>
+          </q-item>
+
+        </q-list>
+      </q-scroll-area>
     </q-drawer>
   </template>
   
-  <script>
-  export default {
-    name: 'MainDrawer',
-    props: {
-      modelValue: {
-        type: Boolean,
-        required: true
-      }
-    },
-    emits: ['update:modelValue']
+<script>
+import ProjectsItem from 'components/ProjectsItem.vue'
+export default {
+  name: 'MainDrawer',
+  components: {
+    ProjectsItem
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true
+    }
+  },
+  emits: ['update:modelValue'],
+  methods: {
+    openGithub() {
+      window.open('https://github.com/Rubenelcurioso/TFG', '_blank');
+    }
   }
-  </script>
+}
+</script>
+
+<style lang="sass" scoped>
+.menu-list .q-item
+  border-radius: 0 32px 32px 0
+</style>

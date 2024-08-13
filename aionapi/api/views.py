@@ -21,7 +21,7 @@ class UserRegistration(APIView):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
                 'user': user.id,
-                'ts': datetime.now().timestamp()
+                'ts': int(datetime.now().timestamp()) # Retrieves in microseconds
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -36,7 +36,7 @@ class UserLogin(APIView):
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                     'user': user.id,
-                    'ts': datetime.now().timestamp()
+                    'ts': int(datetime.now().timestamp()) # Retrieves in microseconds
                 }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -117,3 +117,21 @@ class UserProjectRoleList(APIView):
         user_project_roles = UserProjectRole.objects.all()
         serializer = UserProjectRoleSerializer(user_project_roles, many=True)
         return Response(serializer.data)
+    
+class UserProjects(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            # Check if the JWT token owner is the same as the user_id provided in the URL
+            if request.user.id != user_id:
+                return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+
+            user_project_roles = UserProjectRole.objects.filter(user_id=user_id)
+            project_ids = user_project_roles.values_list('project_id', flat=True)
+            projects = Project.objects.filter(id__in=project_ids)
+            serializer = ProjectSerializer(projects, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

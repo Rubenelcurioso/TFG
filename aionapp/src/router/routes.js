@@ -1,3 +1,5 @@
+import { isTokenExpired, getRefreshToken, getTimestampRefreshToken } from 'src/utils/token-management';
+
 const routes = [
   {
     path: '/',
@@ -26,6 +28,17 @@ const routes = [
   {
     path: '/home/:uid',
     component: () => import('layouts/LoggedLayout.vue'),
+    meta: { requiresAuth: true },
+    beforeEnter: (to, from, next) => {
+      if (isTokenExpired(getRefreshToken(), getTimestampRefreshToken(), '1d')) {
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+      } else {
+        next()
+      }
+    },
     children:  [
       { path: '', component: () => import('pages/HomeUser.vue') }
     ]

@@ -1,15 +1,10 @@
 <template>
-    <q-layout view="hHh lpR fFf">
+    <q-layout view="hHh LpR lFf">
       <q-header bordered class="bg-secondary text-black">
         <q-toolbar>
           <DrawerButton @toggle-drawer="toggleDrawer" />
   
-          <q-toolbar-title class="text-center">
-            <q-btn to="/" flat>
-              <q-avatar>
-                <img src="icons/aion.png" alt="Company Icon">
-              </q-avatar>
-            </q-btn>          
+          <q-toolbar-title class="text-center">        
           </q-toolbar-title>
           <NotificationBell />
           <AvatarMenu />

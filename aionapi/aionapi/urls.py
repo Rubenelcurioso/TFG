@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from api.views import UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
+from api.views import UserProjects, UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
 urlpatterns = [
     path('register/', UserRegistration.as_view(), name='register'),
     path('login/', UserLogin.as_view(), name='login'),
@@ -30,6 +30,6 @@ urlpatterns = [
     path('roles/', RoleList.as_view(), name='role-list'),
     path('tasks/', TaskList.as_view(), name='task-list'),
     path('user-project-roles/', UserProjectRoleList.as_view(), name='user-project-role-list'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
-
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('user/<int:user_id>/projects/', UserProjects.as_view(), name='user-projects'),
 ]
