@@ -118,10 +118,15 @@ async function handleApiError(error) {
     console.error('Access token has expired');
     // Refresh the token
     try {
-      const response = await api.post('/token/refresh/', { refreshToken: getRefreshToken() });
+      const response = await api.post('/token/refresh/', { refresh: getRefreshToken() });
       const { access, refresh } = response.data;
       setToken(access);
       setRefreshToken(refresh);
+      
+      // Retry the last API operation
+      error.config.headers['Authorization'] = `Bearer ${access}`;
+      console.log('Succesfuly done the last operation');
+      return api.request(error.config);
     } catch (error) {
       console.error('Error refreshing token:', error);
       throw error;

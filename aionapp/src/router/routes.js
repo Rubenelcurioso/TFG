@@ -39,8 +39,29 @@ const routes = [
         next()
       }
     },
+
     children:  [
       { path: '', component: () => import('pages/HomeUser.vue') }
+    ]
+  },
+
+  {
+    path: '/new/project',
+    component: () => import('layouts/LoggedLayout.vue'),
+    meta: { requiresAuth: true },
+    beforeEnter: (to, from, next) => {
+      if (isTokenExpired(getRefreshToken(), getTimestampRefreshToken(), '1d')) {
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+      } else {
+        next()
+      }
+    },
+
+    children:  [
+      { path: '', component: () => import('pages/NewProject.vue') }
     ]
   },
 

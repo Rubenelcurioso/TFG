@@ -8,7 +8,7 @@
     >
       <q-scroll-area class="fit">
           <q-list dense padding class="menu-list">
-          <q-item active clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}`">            
+          <q-item active clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}`" @click="closeDrawer">            
             <q-item-section avatar>
               <q-icon name="home" />
             </q-item-section>
@@ -16,9 +16,9 @@
           </q-item>
 
           <q-separator dark spaced inset/>
-          <ProjectsItem />
+          <ProjectsItem  />
 
-          <q-item clickable v-ripple>
+          <q-item clickable v-ripple @click="closeDrawer">
             <q-item-section avatar>
               <q-icon name="business" />
             </q-item-section>
@@ -28,7 +28,7 @@
 
           <q-separator dark spaced inset/>
 
-          <q-item clickable v-ripple @click="openGithub">
+          <q-item clickable v-ripple @click="openGithubAndCloseDrawer">
             <q-item-section avatar>
               <q-icon name="star" />
             </q-item-section>
@@ -55,8 +55,15 @@ export default {
   },
   emits: ['update:modelValue'],
   methods: {
+    openGithubAndCloseDrawer() {
+      this.openGithub();
+      this.closeDrawer();
+    },
     openGithub() {
       window.open('https://github.com/Rubenelcurioso/TFG', '_blank');
+    },
+    closeDrawer() {
+      this.$emit('update:modelValue', false);
     }
   }
 }

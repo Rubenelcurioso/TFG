@@ -19,7 +19,7 @@
         </q-list>
 
 
-        <q-item clickable v-ripple>
+        <q-item clickable v-ripple to="/new/project">
             <q-item-section avatar>
                 <q-icon name="add" color="primary" />
             </q-item-section>

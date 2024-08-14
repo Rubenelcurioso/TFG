@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import User, Business, Team, Employee, Project, Role, Task, UserProjectRole
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate, get_user_model
+import re
 
 AuthUser = get_user_model()
 
@@ -19,7 +20,6 @@ class UserLoginSerializer(serializers.Serializer):
         password = data.get('password')
         user = User.objects.filter(username=username).first()
         user = authenticate(username=username, password=password)
-        # user and user.check_password(password)
         if user:
             return user
         else:
@@ -68,6 +68,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
 
+    def validate(self, data):
+        if data['start_date'] and data['end_date'] and data['start_date'] > data['end_date']:
+            raise serializers.ValidationError("Start date must be before or equal to end date.")
+        if not re.match("^[A-Za-z0-9 ]*$", data['name']):
+            raise serializers.ValidationError("Project name must contain only numbers, spaces, and letters.")
+        return data
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
