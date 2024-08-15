@@ -90,12 +90,18 @@ class Task(models.Model):
         ('M', 'MEDIUM'),
         ('H', 'HIGH'),
     ]
+    STATUS_CHOICES = [
+        ('TODO', 'To do'),
+        ('IN_PROGRESS', 'In progress'),
+        ('DONE', 'Done'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
     priority = models.CharField(max_length=1, choices=PRIORITY_CHOICES, default='L')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TODO')
     user_assigned = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     team_assigned = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
 

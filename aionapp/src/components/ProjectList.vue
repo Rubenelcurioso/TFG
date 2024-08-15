@@ -18,34 +18,54 @@
       <q-separator dark />
   
       <q-card-section>
-        <q-btn flat color="grey" class="q-mb-sm" icon="add" label="Crear proyecto" />
+        <q-btn flat color="grey" class="q-mb-sm" icon="add" label="Crear proyecto" to="/new/project/" />
         
-        <q-item clickable v-ripple>
-          <q-item-section avatar>
-            <q-avatar color="teal" text-color="white" icon="folder" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>[TFG] Gestión de proyectos</q-item-label>
-            <q-item-label caption>3 tareas que debes entregar pro...</q-item-label>
-          </q-item-section>
+        <q-item v-ripple>
+          <q-list>
+            <q-item v-for="project in projects" :key="project.id" clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}/project/${project.id}`">
+              <q-item-section avatar>
+                <q-avatar color="teal" text-color="white" icon="folder" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ project.name }}</q-item-label>
+                <q-item-label caption>{{ project.description }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>        
         </q-item>
       </q-card-section>
     </q-card>
   </template>
   
-  <script>
-  import { defineComponent, ref } from 'vue';
+<script>
+  import { defineComponent, ref, onMounted } from 'vue';
+  import { useQuasar } from 'quasar'
+  import { apiGet } from '../utils/api-wrapper'
   
   export default defineComponent({
     name: 'ProjectList',
     setup() {
       const selectedView = ref('Recientes');
       const viewOptions = ['Recientes', 'Todos', 'Archivados'];
-  
+      const projects = ref([]);
+      const $q = useQuasar();
+
+      const fetchProjects = async () => {
+        try {
+          const response = await apiGet('/user/' + $q.localStorage.getItem('user') + '/projects/');
+          projects.value = response;
+        } catch (error) {
+          console.error('Error fetching projects:', error);
+        }
+      };
+
+      onMounted(fetchProjects);
+
       return {
         selectedView,
         viewOptions,
+        projects,
       };
     },
   });
-  </script>
+</script>

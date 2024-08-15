@@ -1,7 +1,7 @@
 <template>
     <q-btn flat round>
-      <q-avatar size="26px">
-        <img src="path/to/user-avatar.png" alt="Profile">
+      <q-avatar size="26px" color="blue">
+        {{ $q.localStorage.getItem('user').charAt(0).toUpperCase() }}
       </q-avatar>
       <q-menu>
         <q-list style="min-width: 150px">

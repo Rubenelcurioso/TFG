@@ -7,12 +7,13 @@
         default-opened
     >
         <q-list>
-            <q-item v-for="project in projects" :key="project.id" clickable v-ripple>
-                <q-item-section>
+            <q-item v-for="project in projects" :key="project.id" clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}/project/${project.id}`">
+              <q-item-section>
                     <q-item-label>{{ project.name }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                    <q-badge color="primary" :label="`${project.progress}%`" />                </q-item-section>
+                    <q-badge color="primary" :label="`${project.progress}%`" />                
+                </q-item-section>
             </q-item>
         </q-list>
 

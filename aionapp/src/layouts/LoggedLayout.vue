@@ -6,7 +6,6 @@
   
           <q-toolbar-title class="text-center">        
           </q-toolbar-title>
-          <NotificationBell />
           <AvatarMenu />
         </q-toolbar>
       </q-header>
@@ -23,14 +22,12 @@
   import { ref } from 'vue'
   import DrawerButton from 'components/DrawerButton.vue'
   import MainDrawer from 'components/MainDrawer.vue'
-  import NotificationBell from 'components/NotificationBell.vue'
   import AvatarMenu from 'components/AvatarMenu.vue'
   
   export default {
     components: {
       DrawerButton,
       MainDrawer,
-      NotificationBell,
       AvatarMenu
     },
     setup() {
