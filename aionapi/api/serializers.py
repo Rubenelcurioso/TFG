@@ -64,6 +64,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProjectSerializer(serializers.ModelSerializer):
+    owner_id = serializers.IntegerField(write_only=True)
     class Meta:
         model = Project
         fields = '__all__'
@@ -74,6 +75,13 @@ class ProjectSerializer(serializers.ModelSerializer):
         if not re.match("^[A-Za-z0-9 ]*$", data['name']):
             raise serializers.ValidationError("Project name must contain only numbers, spaces, and letters.")
         return data
+    
+    def create(self, validated_data):
+        owner_id = validated_data.pop('owner_id')
+        owner = User.objects.get(id=owner_id)
+        project = Project.objects.create(owner=owner, **validated_data)
+        return project
+    
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
@@ -88,3 +96,13 @@ class UserProjectRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProjectRole
         fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    def validate_username(self, value):
+        if not re.match("^[A-Za-z0-9]*$", value):
+            raise serializers.ValidationError("Username must contain only numbers and letters.")
+        return value

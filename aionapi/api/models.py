@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.exceptions import ValidationError
 
 def validate_age(value):
     age = relativedelta(timezone.now().date(), value).years

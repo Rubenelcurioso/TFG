@@ -66,7 +66,8 @@
 
 <script>
 import { ref } from 'vue'
-import { apiPost } from '../utils/api-wrapper'
+import { apiPost, apiGet } from '../utils/api-wrapper'
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'NewProject',
@@ -79,14 +80,19 @@ export default {
     const searchUser = ref('')
     const filteredUsers = ref([])
     const addedUsers = ref([])
+    const $q = useQuasar()
 
     const onSearchUser = (val) => {
       // Implement user search logic here
       // This is a placeholder, replace with actual API call
-      filteredUsers.value = [
-        { id: 1, name: 'John Doe', email: 'john@example.com' },
-        { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
-      ].filter(user => user.name.toLowerCase().includes(val.toLowerCase()))
+      if (val.length >= 3) {
+        const response = apiGet('/username/' + `${val}` + '/')
+        filteredUsers.value = [
+          { id: 1, name: 'John Doe', email: 'john@example.com' },
+          { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+        ].filter(user => user.name.toLowerCase().includes(val.toLowerCase()))
+      }
+      
     }
 
     const addUserToProject = (user) => {
@@ -106,6 +112,7 @@ export default {
         description: projectDescription.value,
         start_date: startDate.value,
         end_date: endDate.value,
+        owner_id: $q.localStorage.getItem('user')
       });
     }
 

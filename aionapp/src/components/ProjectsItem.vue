@@ -10,11 +10,9 @@
             <q-item v-for="project in projects" :key="project.id" clickable v-ripple>
                 <q-item-section>
                     <q-item-label>{{ project.name }}</q-item-label>
-                    <q-item-label caption>{{ project.description }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                    <q-badge color="primary" :label="project.tasksCount" />
-                </q-item-section>
+                    <q-badge color="primary" :label="`${project.progress}%`" />                </q-item-section>
             </q-item>
         </q-list>
 

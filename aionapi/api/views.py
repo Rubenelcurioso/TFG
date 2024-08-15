@@ -1,5 +1,5 @@
 from .models import User, Business, Team, Employee, Project, Role, Task, UserProjectRole
-from .serializers import UserRegistrationSerializer,UserLoginSerializer, BusinessSerializer, TeamSerializer, EmployeeSerializer, ProjectSerializer, RoleSerializer, TaskSerializer, UserProjectRoleSerializer
+from .serializers import UserSerializer, UserRegistrationSerializer,UserLoginSerializer, BusinessSerializer, TeamSerializer, EmployeeSerializer, ProjectSerializer, RoleSerializer, TaskSerializer, UserProjectRoleSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -92,9 +92,12 @@ class ProjectList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = ProjectSerializer(data=request.data)
+        data = request.data.copy()
+        data['owner_id'] = request.user.id  # Assuming the user is authenticated and request.user is available
+        serializer = ProjectSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            project = serializer.save()
+            UserProjectRole.objects.create(user=User.objects.get(id=project.owner_id), project=project, role=Role.objects.get(name='Owner'))            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -140,5 +143,18 @@ class UserProjects(APIView):
             projects = Project.objects.filter(id__in=project_ids)
             serializer = ProjectSerializer(projects, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class UsernameSearch(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, search_string):
+        try:
+            users = User.objects.filter(username__icontains=search_string)
+            serializer = UserSerializer(users, many=True)
+            usernames = [user['username'] for user in serializer.data]
+            return Response(usernames, status=status.HTTP_200_OK)      
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
