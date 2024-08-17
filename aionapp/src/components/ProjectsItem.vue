@@ -7,7 +7,7 @@
         default-opened
     >
         <q-list>
-            <q-item v-for="project in projects" :key="project.id" clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}/project/${project.id}`">
+            <q-item v-for="project in projects" :key="project.id" clickable v-ripple :to="`/home/${store.uid}/project/${project.id}`">
               <q-item-section>
                     <q-item-label>{{ project.name }}</q-item-label>
                 </q-item-section>
@@ -31,18 +31,17 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { apiGet } from '../utils/api-wrapper'
-import { useQuasar } from 'quasar'
+import { useUserStore } from 'stores/user-store'
 
 export default {
   name: 'ProjectsItem',
   setup() {
     const projects = ref([])
-
+    const store = useUserStore()
 
     const fetchProjects = async () => {
-      const $q = useQuasar()
       try {
-        const response = await apiGet('/user/'+`${$q.localStorage.getItem('user')}`+'/projects/')
+        const response = await apiGet('/user/'+`${store.uid}`+'/projects/')        
         projects.value = response
       } catch (error) {
         console.error('Error fetching projects:', error)
@@ -52,6 +51,7 @@ export default {
     onMounted(fetchProjects)
 
     return {
+      store,
       projects
     }
   }

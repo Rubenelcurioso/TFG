@@ -66,7 +66,7 @@ const routes = [
   },
 
   {
-    path: '/home/:uid/project/:id',
+    path: '/home/:uid/project/:pid',
     component: () => import('layouts/LoggedLayout.vue'),
     meta: { requiresAuth: true },
     beforeEnter: (to, from, next) => {

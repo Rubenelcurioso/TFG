@@ -1,19 +1,19 @@
 import { defineStore } from 'pinia';
 
-export const useCounterStore = defineStore('counter', {
+export const useUserStore = defineStore('user', {
   state: () => ({
-    id: null,
+    uid: 0,
     username: '',
     projects: [],
   }),
   getters: {
-    userId: (state) => state.id,
+    userId: (state) => state.uid,
     userName: (state) => state.username,
     userProjects: (state) => state.projects,
   },
   actions: {
     setUser(user) {
-      this.id = user.id;
+      this.uid = user.uid;
       this.username = user.username;
     },
     setProjects(projects) {

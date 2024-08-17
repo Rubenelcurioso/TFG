@@ -22,7 +22,7 @@
         
         <q-item v-ripple>
           <q-list>
-            <q-item v-for="project in projects" :key="project.id" clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}/project/${project.id}`">
+            <q-item v-for="project in projects" :key="project.id" clickable v-ripple :to="`/home/${store.uid}/project/${project.id}`">
               <q-item-section avatar>
                 <q-avatar color="teal" text-color="white" icon="folder" />
               </q-item-section>
@@ -39,7 +39,7 @@
   
 <script>
   import { defineComponent, ref, onMounted } from 'vue';
-  import { useQuasar } from 'quasar'
+  import { useUserStore } from 'stores/user-store';
   import { apiGet } from '../utils/api-wrapper'
   
   export default defineComponent({
@@ -48,11 +48,11 @@
       const selectedView = ref('Recientes');
       const viewOptions = ['Recientes', 'Todos', 'Archivados'];
       const projects = ref([]);
-      const $q = useQuasar();
+      const store = useUserStore();
 
       const fetchProjects = async () => {
         try {
-          const response = await apiGet('/user/' + $q.localStorage.getItem('user') + '/projects/');
+          const response = await apiGet('/user/' + store.uid + '/projects/');
           projects.value = response;
         } catch (error) {
           console.error('Error fetching projects:', error);
@@ -62,6 +62,7 @@
       onMounted(fetchProjects);
 
       return {
+        store,
         selectedView,
         viewOptions,
         projects,

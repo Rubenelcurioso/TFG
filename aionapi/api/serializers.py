@@ -92,6 +92,10 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
 
+    def validate(self, data):
+        if data.get('start_date') and data.get('end_date') and data['start_date'] >= data['end_date']:
+            raise serializers.ValidationError("Start date must be before or equal to end date.")
+        return data
 class UserProjectRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProjectRole

@@ -8,8 +8,7 @@
     >
       <q-scroll-area class="fit">
           <q-list dense padding class="menu-list">
-          <q-item active clickable v-ripple :to="`/home/${$q.localStorage.getItem('user')}`" @click="closeDrawer">            
-            <q-item-section avatar>
+          <q-item active clickable v-ripple :to="`/home/${store.uid}`" @click="closeDrawer">            <q-item-section avatar>
               <q-icon name="home" />
             </q-item-section>
             <q-item-section>Home</q-item-section>
@@ -42,6 +41,7 @@
   
 <script>
 import ProjectsItem from 'components/ProjectsItem.vue'
+import { useUserStore } from 'stores/user-store'
 export default {
   name: 'MainDrawer',
   components: {
@@ -54,6 +54,10 @@ export default {
     }
   },
   emits: ['update:modelValue'],
+  setup() {
+    const store = useUserStore();
+    return { store };
+  },
   methods: {
     openGithubAndCloseDrawer() {
       this.openGithub();

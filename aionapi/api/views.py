@@ -21,6 +21,7 @@ class UserRegistration(APIView):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
                 'user': user.id,
+                'username': user.username,
                 'ts': int(datetime.now().timestamp()) # Retrieves in microseconds
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -36,6 +37,7 @@ class UserLogin(APIView):
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                     'user': user.id,
+                    'username': user.username,
                     'ts': int(datetime.now().timestamp()) # Retrieves in microseconds
                 }, status=status.HTTP_200_OK)
         
@@ -54,6 +56,17 @@ class UserLogout(APIView):
             except Exception as e:
                 return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserDetail(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+            return Response({'username': user.username}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class BusinessList(APIView):
     authentication_classes = [JWTAuthentication]
@@ -119,6 +132,13 @@ class TaskList(APIView):
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
 
+    def post(self, request):
+        serializer = TaskSerializer(data=request.data)
+        if serializer.is_valid():
+            task = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class UserProjectRoleList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -145,6 +165,26 @@ class UserProjects(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class ProjectUsers(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            # Check if the user has access to the project
+            if not UserProjectRole.objects.filter(user=request.user, project_id=project_id).exists():
+                return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+
+            user_project_roles = UserProjectRole.objects.filter(project_id=project_id)
+            user_ids = user_project_roles.values_list('user_id', flat=True)
+            users = User.objects.filter(id__in=user_ids)
+            serializer = UserSerializer(users, many=True)
+            user_data = [{'id': user['id'], 'username': user['username']} for user in serializer.data]
+            return Response(user_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UsernameSearch(APIView):
     authentication_classes = [JWTAuthentication]

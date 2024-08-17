@@ -1,7 +1,7 @@
 <template>
     <q-btn flat round>
       <q-avatar size="26px" color="blue">
-        {{ $q.localStorage.getItem('user').charAt(0).toUpperCase() }}
+        {{ store.username.charAt(0).toUpperCase() }}      
       </q-avatar>
       <q-menu>
         <q-list style="min-width: 150px">
@@ -17,11 +17,10 @@
   </template>
   
   <script>
- import { useQuasar } from 'quasar'
  import { useRouter } from 'vue-router'
  import { apiPost } from '../utils/api-wrapper'
  import { removeTokens } from '../utils/token-management'
-
+ import { useUserStore } from 'stores/user-store'
 
   export default {
     name: 'AvatarMenu',
@@ -31,7 +30,7 @@
         console.log('Opening settings')
       }
 
-      const $q = useQuasar()
+      const store = useUserStore()
       const router = useRouter()
 
       const logout = async () => {
@@ -45,6 +44,7 @@
       }
   
       return {
+        store,
         openSettings,
         logout
       }
