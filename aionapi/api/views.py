@@ -99,9 +99,13 @@ class ProjectList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        projects = Project.objects.all()
-        serializer = ProjectSerializer(projects, many=True)
+    def get(self, request, project_id=None):
+        if project_id:
+            project = Project.objects.get(id=project_id)
+            serializer = ProjectSerializer(project)
+        else:
+            projects = Project.objects.none()
+            serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
 
     def post(self, request):

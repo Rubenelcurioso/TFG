@@ -43,6 +43,7 @@ export default {
       try {
         const response = await apiGet('/user/'+`${store.uid}`+'/projects/')        
         projects.value = response
+        store.setProjects(response)
       } catch (error) {
         console.error('Error fetching projects:', error)
       }

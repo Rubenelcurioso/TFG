@@ -42,8 +42,6 @@ export default defineComponent({
           uid: user,
           username: username
         })
-        console.log(store.uid)
-        console.log(store.username)
         router.push(`/home/${user}`)    
       } catch (error) {
         console.error('Login failed', error)

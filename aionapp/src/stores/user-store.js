@@ -16,8 +16,23 @@ export const useUserStore = defineStore('user', {
       this.uid = user.uid;
       this.username = user.username;
     },
-    setProjects(projects) {
-      this.projects = projects;
+    setProjects(project) {
+      const existingProject = this.projects.find(p => p.id === project.id)
+      
+      if (!existingProject) {
+        this.projects.push(project)
+      } else {
+        const updatedFields = ['name', 'description', 'start_date', 'end_date', 'progress']
+        
+        updatedFields.forEach(field => {
+          if (existingProject[field] !== project[field]) {
+            existingProject[field] = project[field]
+          }
+        })
+      }
     },
   },
+  persist: {
+    storage: sessionStorage
+  }
 });

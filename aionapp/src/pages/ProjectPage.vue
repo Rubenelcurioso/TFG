@@ -32,6 +32,7 @@ import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import TaskTable from 'components/TaskTable.vue';
 import { apiGet } from '../utils/api-wrapper';
+import { useUserStore } from 'stores/user-store';
 
 export default defineComponent({
   name: 'ProjectPage',
@@ -47,9 +48,11 @@ export default defineComponent({
     const endDate = ref('')
     const description = ref('')
     const progress = ref(0.00)
+    const store = useUserStore();
+    console.log(store.projects)
 
     const fetchProjectData = async () => {
-      const response = await apiGet('/project/'+`${projectId.value}`+'/');
+      const response = await apiGet('/project/'+projectId.value+'/');
       projectName.value = response.name;
       createdAt.value = response.start_date;
       endDate.value = response.end_date;
