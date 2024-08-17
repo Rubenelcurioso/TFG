@@ -4,14 +4,20 @@ export const useCounterStore = defineStore('counter', {
   state: () => ({
     id: null,
     username: '',
+    projects: [],
   }),
   getters: {
-    // No longer needed, can be removed or commented out
+    userId: (state) => state.id,
+    userName: (state) => state.username,
+    userProjects: (state) => state.projects,
   },
   actions: {
     setUser(user) {
       this.id = user.id;
       this.username = user.username;
+    },
+    setProjects(projects) {
+      this.projects = projects;
     },
   },
 });
