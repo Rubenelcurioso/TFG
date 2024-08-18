@@ -11,14 +11,6 @@
       </q-card-section>
 
       <q-card-section>
-        <q-input
-          v-model="taskDescription"
-          type="textarea"
-          label="Description"
-        />
-      </q-card-section>
-
-      <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
             <q-input v-model="startDate" label="Start Date" type="date" :rules="startDateRules" />
@@ -138,20 +130,19 @@ export default {
       try {
         const taskData = {
           name: taskName.value,
-          description: taskDescription.value,
           start_date: startDate.value,
           end_date: endDate.value,
           priority: priority.value,
           project: route.params.pid,
-          team_assigned_id: assignedTeam.value.value,
-          user_assigned_id: assignedUser.value.value,
+          //team_assigned: assignedTeam.value.value,
+          user_assigned: assignedUser.value.value,
           status: status.value
         };
-        await apiPost('/new/task/', taskData)
+        await apiPost('/new/task/', taskData);
       } catch (error) {
         console.error('Error creating task:', error);
       }
-      window.location.reload();
+      //window.location.reload();
     };
 
     const closeDialog = () => {

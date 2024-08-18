@@ -49,7 +49,6 @@ export default defineComponent({
     const description = ref('')
     const progress = ref(0.00)
     const store = useUserStore();
-    console.log(store.projects)
 
     const fetchProjectData = async () => {
       const response = await apiGet('/project/'+projectId.value+'/');

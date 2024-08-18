@@ -5,7 +5,7 @@
       title="Tasks"
       :rows="rows"
       :columns="columns"
-      row-key="name"
+      row-key="id"
       :selected-rows-label="getSelectedString"
       selection="multiple"
       v-model:selected="selected"
@@ -22,7 +22,7 @@
           <q-checkbox v-model="props.selected" />
         </q-td>
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          <q-input v-model="props.row[col.name]" dense borderless />
+          {{ props.row[col.field] }}
         </q-td>
       </q-tr>
     </template>
@@ -36,8 +36,10 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import TaskCreationCard from 'components/TaskCreationCard.vue'
+import { apiGet, apiDelete } from '../utils/api-wrapper'
+import { useRoute } from 'vue-router'
 
 const columns = [
         {
@@ -45,7 +47,7 @@ const columns = [
           required: true,
           label: 'Task name',
           align: 'left',
-          field: row => row.name,
+          field: 'name',
           format: val => `${val}`,
         },
         { name: 'user', align: 'center', label: 'Assigned to', field: 'user', sortable: true },
@@ -56,36 +58,16 @@ const columns = [
         { name: 'team', label: 'Team assigned', field: 'team', sortable: true},
 ]
 
-const rows = ref([
-        {
-          name: 'Frozen Yogurt',
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-          sodium: 87,
-          calcium: '14%',
-          iron: '1%'
-        }
-])
-
 export default defineComponent({
   name: 'TaskTable',
   components : {
     TaskCreationCard
     },
   setup () {
+    const route = useRoute()
     const selected = ref([])
     const dialogVisible = ref(false)
-    const newTask = ref({
-      name: '',
-      user: '',
-      start: '',
-      end: '',
-      priority: '',
-      status: '',
-      team: ''
-    })
+    const rows = ref([])
 
     const getSelectedString = () => {
       return selected.value.length === 0 ? '' : `${selected.value.length} record${selected.value.length > 1 ? 's' : ''} selected of ${rows.value.length}`
@@ -95,7 +77,30 @@ export default defineComponent({
       dialogVisible.value = true
     }
 
+    const fetchTasks = async () => {
+      try {
+        const response = await apiGet('project/'+route.params.pid+'/tasks/');
+        rows.value = response;
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
+    }
 
+    const removeSelectedRows = async () => {
+      try {
+        for (const row of selected.value) {
+          await apiDelete(`/remove/task/${row.id}/`);
+        }
+        await fetchTasks();
+        selected.value = [];
+      } catch (error) {
+        console.error('Error removing tasks:', error);
+      }
+    }
+
+    onMounted(() => {
+      fetchTasks()
+    })
 
     return {
       selected,
@@ -103,8 +108,8 @@ export default defineComponent({
       columns,
       rows,
       dialogVisible,
-      newTask,
       showDialog,
+      removeSelectedRows,
     }
   }
 });

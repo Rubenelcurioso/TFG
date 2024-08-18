@@ -101,10 +101,16 @@ class ProjectList(APIView):
 
     def get(self, request, project_id=None):
         if project_id:
-            project = Project.objects.get(id=project_id)
-            serializer = ProjectSerializer(project)
+            try:
+                project = Project.objects.get(id=project_id)
+                if not UserProjectRole.objects.filter(user=request.user, project=project).exists():
+                    return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
+                serializer = ProjectSerializer(project)
+            except Project.DoesNotExist:
+                return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
-            projects = Project.objects.none()
+            user_projects = UserProjectRole.objects.filter(user=request.user).values_list('project', flat=True)
+            projects = Project.objects.filter(id__in=user_projects)
             serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
 
@@ -131,12 +137,53 @@ class TaskList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        tasks = Task.objects.all()
-        serializer = TaskSerializer(tasks, many=True)
-        return Response(serializer.data)
+    def delete(self, request, task_id):
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        # Check if the user is part of the project
+        user_project_role = UserProjectRole.objects.filter(user=request.user, project=task.project).first()
+        if not user_project_role:
+            return Response({'error': 'You do not have access to this task'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if the user role is not a guest and has sufficient permissions
+        if user_project_role.role.name == 'Guest' or user_project_role.role.perm < 7:
+            return Response({'error': 'You do not have sufficient permissions to delete this task'}, status=status.HTTP_403_FORBIDDEN)
+
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, project_id):
+        # Check if the user has access to the project
+        user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
+        if not user_project_role:
+            return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
+        
+        tasks = Task.objects.filter(project_id=project_id).select_related('user_assigned', 'team_assigned')
+        
+        task_data = []
+        for task in tasks:
+            task_info = {
+                'id': task.id,
+                'name': task.name,
+                'user': task.user_assigned.username if task.user_assigned else None,
+                'priority': task.get_priority_display(),
+                'start_date': task.start_date,
+                'end_date': task.end_date,
+                'status': task.get_status_display(),                
+                'team': task.team_assigned.name if task.team_assigned else None
+            }
+            task_data.append(task_info)
+        
+        return Response(task_data)
     def post(self, request):
+        # Check if the user has sufficient permissions
+        user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=request.data.get('project')).first()
+        if not user_project_role or user_project_role.role.perm < 7:
+            return Response({'error': 'You do not have sufficient permissions to create a task'}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = TaskSerializer(data=request.data)
         if serializer.is_valid():
             task = serializer.save()
@@ -162,11 +209,14 @@ class UserProjects(APIView):
             if request.user.id != user_id:
                 return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
 
-            user_project_roles = UserProjectRole.objects.filter(user_id=user_id)
-            project_ids = user_project_roles.values_list('project_id', flat=True)
-            projects = Project.objects.filter(id__in=project_ids)
-            serializer = ProjectSerializer(projects, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            user_project_roles = UserProjectRole.objects.filter(user_id=user_id).select_related('role', 'project')
+            projects_data = []
+            for upr in user_project_roles:
+                project_data = ProjectSerializer(upr.project).data
+                project_data['role_perm'] = upr.role.perm if upr.role else None
+                projects_data.append(project_data)
+            
+            return Response(projects_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

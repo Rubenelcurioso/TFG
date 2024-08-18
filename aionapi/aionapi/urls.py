@@ -27,6 +27,7 @@ urlpatterns = [
     path('new/project/', ProjectList.as_view(), name='new-project'), # New project
     path('roles/', RoleList.as_view(), name='role-list'),
     path('new/task/', TaskList.as_view(), name='new-task'), # New task
+    path('remove/task/<int:task_id>/', TaskList.as_view(), name='remove-task'), # Remove task
     path('user-project-roles/', UserProjectRoleList.as_view(), name='user-project-role-list'), 
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # Token JWT refresh
     path('user/<int:user_id>/projects/', UserProjects.as_view(), name='user-projects'), # Projects of user
@@ -35,5 +36,5 @@ urlpatterns = [
     path('project/<int:project_id>/', ProjectList.as_view(), name='project'), # Project data
     path('project/<int:project_id>/users/', ProjectUsers.as_view(), name='project-users'), # Users of a project
     path('project/<int:project_id>/teams/', UsernameSearch.as_view(), name='project-usernames'), # Teams of a project
-    path('project/<int:project_id>/tasks/', UsernameSearch.as_view(), name='project-usernames'), # Tasks of a project
+    path('project/<int:project_id>/tasks/', TaskList.as_view(), name='project-tasks'), # Tasks of a project
 ]
