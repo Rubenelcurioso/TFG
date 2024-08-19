@@ -1,74 +1,100 @@
 <template>
-    <q-card class="bg-dark text-white">
-      <q-card-section>
-        <div class="text-h6">{{ title }}</div>
-        <q-tabs
-          v-model="tab"
-          dense
-          class="text-grey"
-          active-color="white"
-          indicator-color="white"
-          align="left"
-          narrow-indicator
-        >
-          <q-tab name="proximas" label="Próximas" />
-          <q-tab name="conretraso" label="Con retraso (1)" />
-          <q-tab name="finalizadas" label="Finalizadas" />
-        </q-tabs>
-      </q-card-section>
-  
-      <q-separator dark />
-  
-      <q-card-section>
-        <q-btn flat color="grey" class="q-mb-sm" icon="add" label="Crear tarea" />
-        
-        <q-list dark>
-          <q-item v-for="task in tasks" :key="task.id" clickable v-ripple>
-            <q-item-section avatar>
-              <q-checkbox v-model="task.done" dark color="green" />
-            </q-item-section>
-            <q-item-section>{{ task.title }}</q-item-section>
-            <q-item-section side>
-              <q-chip :color="task.chipColor" text-color="white" size="sm">
-                {{ task.chipText }}
-              </q-chip>
-            </q-item-section>
-          </q-item>
-        </q-list>
-        
-        <div class="text-center q-mt-sm">
-          <q-btn flat color="grey" label="Mostrar más" />
-        </div>
-      </q-card-section>
-    </q-card>
-  </template>
-  
-  <script>
-  import { defineComponent, ref } from 'vue';
-  
-  export default defineComponent({
-    name: 'TaskList',
-    props: {
-      title: {
-        type: String,
-        required: true,
-      },
+  <q-card class="bg-dark text-white">
+    <q-card-section>
+      <div class="text-h6">{{ title }}</div>
+    </q-card-section>
+
+    <q-separator dark />
+
+    <q-card-section>
+      <q-table
+        flat
+        bordered
+        dark
+        :rows="tasks"
+        :columns="columns"
+        row-key="id"
+        :filter="filter"
+      >
+        <template v-slot:top-right>
+          <q-input dark dense debounce="300" v-model="filter" placeholder="Search">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </template>
+
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td v-for="col in props.cols" :key="col.name" :props="props">
+              {{ col.name === 'start_date' || col.name === 'end_date' ? formatDate(props.row[col.field]) : props.row[col.field] }}
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+    </q-card-section>
+  </q-card>
+</template>
+
+<script>
+import { defineComponent, onMounted, ref } from 'vue';
+import { apiGet} from '../utils/api-wrapper'
+import { useUserStore } from 'stores/user-store';
+import { date } from 'quasar'
+
+export default defineComponent({
+  name: 'TaskList',
+  props: {
+    title: {
+      type: String,
+      required: true,
     },
-    setup() {
-      const tab = ref('proximas');
-      const tasks = [
-        { id: 1, title: 'Análisis de errores, riesgos, soluciones', done: false, chipColor: 'teal', chipText: '[TFG] G...' },
-        { id: 2, title: 'Tests Django operaciones', done: false, chipColor: 'teal', chipText: '[TFG] S...' },
-        { id: 3, title: 'Operaciones Django', done: false, chipColor: 'teal', chipText: '[TFG] G...' },
-        { id: 4, title: 'Verificar contenidos .gitignore', done: false, chipColor: 'teal', chipText: '[TFG] G...' },
-        { id: 5, title: '[Docker] Contenedor Django', done: false, chipColor: 'teal', chipText: '[TFG] G...' },
-        { id: 6, title: '[Docker] Contenedor Nuxt', done: false, chipColor: 'teal', chipText: '[TFG] G...' },
-      ];
-  
-      return {
-        tab,
-        tasks,
-      };
-    },
-  });
-  </script>
+  },
+  setup() {
+    const store = useUserStore();
+    const filter = ref('');
+    const columns = [
+        {
+          name: 'name',
+          required: true,
+          label: 'Task name',
+          align: 'left',
+          field: 'name',
+          format: val => `${val}`,
+        },
+        { name: 'start_date', label: 'Starts', field: 'start_date', sortable: true },
+        { name: 'end_date', label: 'Ends', field: 'end_date', sortable: true },
+        { name: 'priority', label: 'Priority', field: 'priority', sortable: true },
+        { name: 'status', label: 'Status', field: 'status', sortable: true},
+        { name: 'team', label: 'Team assigned', field: 'team', sortable: true},
+    ];
+    const tasks = ref([]);
+
+    const fetchTasks = async () => {
+          try {
+            const response = await apiGet(`/user/${store.uid}/tasks`);            
+            tasks.value = response;
+          } catch (error) {
+            console.error('Error fetching tasks:', error);
+            // Handle the error appropriately, e.g., show an error message to the user
+          }     
+    };
+
+    const formatDate = (dateString) => {
+      if (!dateString) return '';
+      return date.formatDate(dateString, 'YYYY-MM-DD');
+    };
+
+    onMounted(() => {
+      fetchTasks();
+    });
+
+    return {
+      filter,
+      columns,
+      tasks,
+      formatDate,
+    };
+  },
+});
+</script>

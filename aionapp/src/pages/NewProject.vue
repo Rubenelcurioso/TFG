@@ -68,6 +68,7 @@
 import { ref } from 'vue'
 import { apiPost, apiGet } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'NewProject',
@@ -81,6 +82,7 @@ export default {
     const filteredUsers = ref([])
     const addedUsers = ref([])
     const store = useUserStore()
+    const router = useRouter()
 
     const onSearchUser = (val) => {
       // Implement user search logic here
@@ -104,15 +106,28 @@ export default {
       addedUsers.value = addedUsers.value.filter(u => u.id !== user.id)
     }
 
-    const createProject = () => {
-      // Implement project creation logic here
-      apiPost('/new/project/', {
-        name: projectName.value,
-        description: projectDescription.value,
-        start_date: startDate.value,
-        end_date: endDate.value,
-        owner_id: store.uid
-      });
+    const createProject = async () => {
+      try {
+        const projectData = {
+          name: projectName.value,
+          description: projectDescription.value,
+          start_date: startDate.value,
+          end_date: endDate.value,
+          owner_id: store.uid,
+          members: addedUsers.value.map(user => user.id)
+        };
+
+        const response = await apiPost('/new/project/', projectData);
+
+        if (response && response.id) {
+          await router.push(`/home/${store.uid}/project/${response.id}/`);
+        } else {
+          throw new Error('Failed to create project');
+        }
+      } catch (error) {
+        console.error('Error creating project:', error);
+        // Handle error (e.g., show error message to user)
+      }
     }
 
     return {

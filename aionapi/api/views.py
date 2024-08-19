@@ -99,6 +99,18 @@ class ProjectList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
+
+    def delete(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+            if project.owner != request.user:
+                return Response({'error': 'You do not have permission to delete this project'}, status=status.HTTP_403_FORBIDDEN)
+            
+            project.delete()
+            return Response({'message': 'Project deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Project.DoesNotExist:
+            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+
     def get(self, request, project_id=None):
         if project_id:
             try:
@@ -137,6 +149,28 @@ class TaskList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def put(self, request, task_id):
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the user is part of the project
+        user_project_role = UserProjectRole.objects.filter(user=request.user, project=task.project).first()
+        if not user_project_role:
+            return Response({'error': 'You do not have access to this task'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if the user role has sufficient permissions
+        if user_project_role.role.name == 'Guest' or user_project_role.role.perm < 5:
+            return Response({'error': 'You do not have sufficient permissions to edit this task'}, status=status.HTTP_403_FORBIDDEN)
+
+        print(request.data)
+        serializer = TaskSerializer(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, task_id):
         try:
             task = Task.objects.get(id=task_id)
@@ -155,19 +189,22 @@ class TaskList(APIView):
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get(self, request, project_id):
-        # Check if the user has access to the project
-        user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
-        if not user_project_role:
-            return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
-        
-        tasks = Task.objects.filter(project_id=project_id).select_related('user_assigned', 'team_assigned')
-        
-        task_data = []
-        for task in tasks:
+    def get(self, request, project_id=None, task_id=None, user_id=None):
+        if task_id:
+            try:
+                task = Task.objects.select_related('user_assigned', 'team_assigned', 'project').get(id=task_id)
+            except Task.DoesNotExist:
+                return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Check if the user has access to the project
+            user_project_role = UserProjectRole.objects.filter(user=request.user, project=task.project).first()
+            if not user_project_role:
+                return Response({'error': 'You do not have access to this task'}, status=status.HTTP_403_FORBIDDEN)
+
             task_info = {
                 'id': task.id,
                 'name': task.name,
+                'description': task.description,
                 'user': task.user_assigned.username if task.user_assigned else None,
                 'priority': task.get_priority_display(),
                 'start_date': task.start_date,
@@ -175,9 +212,55 @@ class TaskList(APIView):
                 'status': task.get_status_display(),                
                 'team': task.team_assigned.name if task.team_assigned else None
             }
-            task_data.append(task_info)
+            return Response(task_info)
         
-        return Response(task_data)
+        elif project_id:
+            # Check if the user has access to the project
+            user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
+            if not user_project_role:
+                return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
+            
+            tasks = Task.objects.filter(project_id=project_id).select_related('user_assigned', 'team_assigned')
+            
+            task_data = []
+            for task in tasks:
+                task_info = {
+                    'id': task.id,
+                    'name': task.name,
+                    'description': task.description,
+                    'user': task.user_assigned.username if task.user_assigned else None,
+                    'priority': task.get_priority_display(),
+                    'start_date': task.start_date,
+                    'end_date': task.end_date,
+                    'status': task.get_status_display(),                
+                    'team': task.team_assigned.name if task.team_assigned else None
+                }
+                task_data.append(task_info)
+            
+            return Response(task_data)
+        
+        elif user_id:
+            # Get tasks for the user making the request
+            tasks = Task.objects.filter(user_assigned=request.user).select_related('user_assigned', 'team_assigned', 'project')
+            
+            task_data = []
+            for task in tasks:
+                task_info = {
+                    'id': task.id,
+                    'name': task.name,
+                    'description': task.description,
+                    'user': task.user_assigned.username,
+                    'priority': task.get_priority_display(),
+                    'start_date': task.start_date,
+                    'end_date': task.end_date,
+                    'status': task.get_status_display(),                
+                    'team': task.team_assigned.name if task.team_assigned else None,
+                    'project': task.project.name
+                }
+                task_data.append(task_info)
+            
+            return Response(task_data)
+        
     def post(self, request):
         # Check if the user has sufficient permissions
         user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=request.data.get('project')).first()

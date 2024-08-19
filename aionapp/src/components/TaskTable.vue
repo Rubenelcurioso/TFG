@@ -7,12 +7,13 @@
       :columns="columns"
       row-key="id"
       :selected-rows-label="getSelectedString"
-      selection="multiple"
+      selection="single"
       v-model:selected="selected"
     >
     
     <template v-slot:top>
       <q-btn icon="add" color="positive" @click="showDialog" label="New task" class="q-mr-sm" />
+      <q-btn icon="edit" color="primary" @click="editSelectedRow" label="Edit selected" :disable="!selected.length" class="q-mr-sm" />
       <q-btn icon="delete" color="negative" @click="removeSelectedRows" label="Remove selected" :disable="!selected.length" />
     </template>
     
@@ -30,15 +31,20 @@
     </q-table>
 
     <q-dialog v-model="dialogVisible">
-      <TaskCreationCard />
+      <TaskCreationCard @task-created="onTaskCreate" @close-dialog="dialogVisible = false" />
+    </q-dialog>
+
+    <q-dialog v-model="editDialogVisible">
+      <TaskEditCard :taskId="selected[0].id" @task-updated="onTaskEdit" @close-dialog="editDialogVisible = false" />    
     </q-dialog>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, watch } from 'vue'
 import TaskCreationCard from 'components/TaskCreationCard.vue'
-import { apiGet, apiDelete } from '../utils/api-wrapper'
+import TaskEditCard from 'components/TaskEditCard.vue'
+import { apiGet, apiDelete, apiPut } from '../utils/api-wrapper'
 import { useRoute } from 'vue-router'
 
 const columns = [
@@ -51,8 +57,8 @@ const columns = [
           format: val => `${val}`,
         },
         { name: 'user', align: 'center', label: 'Assigned to', field: 'user', sortable: true },
-        { name: 'start_date', label: 'Starts', field: 'start', sortable: true },
-        { name: 'end_date', label: 'Ends', field: 'end', sortable: true },
+        { name: 'start_date', label: 'Starts', field: 'start_date', sortable: true },
+        { name: 'end_date', label: 'Ends', field: 'end_date', sortable: true },
         { name: 'priority', label: 'Priority', field: 'priority', sortable: true },
         { name: 'status', label: 'Status', field: 'status', sortable: true},
         { name: 'team', label: 'Team assigned', field: 'team', sortable: true},
@@ -61,12 +67,14 @@ const columns = [
 export default defineComponent({
   name: 'TaskTable',
   components : {
-    TaskCreationCard
+    TaskCreationCard,
+    TaskEditCard
     },
   setup () {
     const route = useRoute()
     const selected = ref([])
     const dialogVisible = ref(false)
+    const editDialogVisible = ref(false)
     const rows = ref([])
 
     const getSelectedString = () => {
@@ -98,6 +106,23 @@ export default defineComponent({
       }
     }
 
+    const editSelectedRow = () => {
+      if (selected.value.length === 1) {
+        editDialogVisible.value = true;
+      }
+    }
+
+    const onTaskEdit = async () => {
+      await fetchTasks();
+      editDialogVisible.value = false;
+      selected.value = [];
+    }
+
+    const onTaskCreate = async () => {
+      await fetchTasks();
+      dialogVisible.value = false;
+    }
+
     onMounted(() => {
       fetchTasks()
     })
@@ -108,8 +133,12 @@ export default defineComponent({
       columns,
       rows,
       dialogVisible,
+      editDialogVisible,
       showDialog,
       removeSelectedRows,
+      editSelectedRow,
+      onTaskEdit,
+      onTaskCreate,
     }
   }
 });

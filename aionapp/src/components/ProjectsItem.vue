@@ -14,6 +14,11 @@
                 <q-item-section side>
                     <q-badge color="primary" :label="`${project.progress}%`" />                
                 </q-item-section>
+                <q-item-section side v-if="project.role_perm >= 63">
+                    <q-btn flat round color="red" icon="close" @click.stop="confirmDelete(project.id)">
+                        <q-tooltip>Delete project</q-tooltip>
+                    </q-btn>
+                </q-item-section>
             </q-item>
         </q-list>
 
@@ -26,11 +31,24 @@
         </q-item>
 
     </q-expansion-item>
+
+    <q-dialog v-model="confirmDeleteDialog">
+      <q-card>
+        <q-card-section class="row items-center">
+          <span class="q-ml-sm">Are you sure you want to delete this project?</span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Delete" color="negative" @click="deleteProject" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue'
-import { apiGet } from '../utils/api-wrapper'
+import { apiGet, apiDelete } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store'
 
 export default {
@@ -38,10 +56,12 @@ export default {
   setup() {
     const projects = ref([])
     const store = useUserStore()
+    const confirmDeleteDialog = ref(false)
+    const projectToDelete = ref(null)
 
     const fetchProjects = async () => {
       try {
-        const response = await apiGet('/user/'+`${store.uid}`+'/projects/')        
+        const response = await apiGet('/user/'+`${store.uid}`+'/projects/')    
         projects.value = response
         store.setProjects(response)
       } catch (error) {
@@ -49,11 +69,28 @@ export default {
       }
     }
 
+    const confirmDelete = (projectId) => {
+      projectToDelete.value = projectId
+      confirmDeleteDialog.value = true
+    }
+
+    const deleteProject = async () => {
+      try {
+        await apiDelete(`/remove/project/${projectToDelete.value}/`)
+        await fetchProjects()
+      } catch (error) {
+        console.error('Error deleting project:', error)
+      }
+    }
+
     onMounted(fetchProjects)
 
     return {
       store,
-      projects
+      projects,
+      confirmDeleteDialog,
+      confirmDelete,
+      deleteProject
     }
   }
 }

@@ -92,9 +92,28 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
 
+    def to_internal_value(self, data):
+        # Convert priority
+        priority_mapping = {'LOW': 'L', 'MEDIUM': 'M', 'HIGH': 'H'}
+        if 'priority' in data:
+            data['priority'] = priority_mapping.get(data['priority'].upper(), data['priority'])
+        
+        # Convert status
+        status_mapping = {
+            'todo': 'TODO', 
+            'to do': 'TODO',
+            'in progress': 'IN_PROGRESS',
+            'inprogress': 'IN_PROGRESS',
+            'in_progress': 'IN_PROGRESS',
+            'done': 'DONE'
+        }
+        if 'status' in data:
+            data['status'] = status_mapping.get(data['status'].lower(), data['status'])
+        return super().to_internal_value(data)
     def validate(self, data):
-        if data.get('start_date') and data.get('end_date') and data['start_date'] >= data['end_date']:
-            raise serializers.ValidationError("Start date must be before or equal to end date.")
+        if data.get('start_date') and data.get('end_date') and data['start_date'] > data['end_date']:
+            raise serializers.ValidationError("Start date must be before end date.")
+
         return data
 class UserProjectRoleSerializer(serializers.ModelSerializer):
     class Meta:

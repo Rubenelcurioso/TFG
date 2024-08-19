@@ -16,7 +16,19 @@ export const useUserStore = defineStore('user', {
       this.uid = user.uid;
       this.username = user.username;
     },
-    setProjects(project) {
+    setProjects(projects) {
+      // Always is passed all the projects updated
+      // Flushing the projects is valid because the projects are updated
+      this.projects = []
+
+      if (Array.isArray(projects)) {
+        projects.forEach(project => this.updateProject(project))
+      } else {
+        this.updateProject(projects)
+      }
+    },
+
+    updateProject(project) {
       const existingProject = this.projects.find(p => p.id === project.id)
       
       if (!existingProject) {

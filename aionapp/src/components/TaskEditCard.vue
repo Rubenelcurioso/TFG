@@ -1,7 +1,7 @@
 <template>
-  <q-card class="task-creation-card primary">
+  <q-card class="task-edit-card primary">
     <q-toolbar>
-      <q-toolbar-title>Add a task</q-toolbar-title>
+      <q-toolbar-title>Edit task</q-toolbar-title>
       <q-btn flat round dense icon="close" @click="closeDialog" />
     </q-toolbar>
 
@@ -57,20 +57,25 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn type="submit" color="secondary" label="Submit" />
+        <q-btn type="submit" color="secondary" label="Update" />
       </q-card-actions>
     </q-form>
   </q-card>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { apiGet, apiPost } from '../utils/api-wrapper';
+import { ref, onMounted, inject } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { apiGet, apiPut } from '../utils/api-wrapper';
 
 export default {
-  name: 'TaskCreationCard',
-  emits: ['task-created', 'close-dialog'],
+  name: 'TaskEditCard',
+  props: {
+    taskId: {
+      type: String,
+      required: true
+    }
+  },
   setup(props, { emit }) {
     const taskName = ref('');
     const startDate = ref('');
@@ -80,8 +85,25 @@ export default {
     const assignedUser = ref(null);
     const assignedTeam = ref(null);
     const route = useRoute();
+    const router = useRouter();
     const userOptions = ref([]);
     const teamOptions = ref([]);
+    const refresh = inject('refresh');
+
+    const loadTaskData = async () => {
+      try {
+        const response = await apiGet(`/task/${props.taskId}/`);
+        taskName.value = response.name;
+        startDate.value = response.start_date;
+        endDate.value = response.end_date;
+        priority.value = response.priority;
+        status.value = response.status;
+        assignedUser.value = response.user_assigned;
+        assignedTeam.value = response.team_assigned;
+      } catch (error) {
+        console.error('Error loading task data:', error);
+      }
+    };
 
     const loadUserOptions = async () => {
       const response = await apiGet('/project/'+route.params.pid+'/users/');
@@ -94,8 +116,9 @@ export default {
     };
 
     onMounted(() => {
+      loadTaskData();
       loadUserOptions();
-      loadTeamOptions();
+      //loadTeamOptions();
     });
 
     const taskNameRules = [
@@ -124,11 +147,11 @@ export default {
           team_assigned: assignedTeam.value ? assignedTeam.value.value : null,
           status: status.value
         };
-        await apiPost('/new/task/', taskData);
-        emit('task-created');
+        await apiPut(`/task/${props.taskId}/`, taskData);
+        emit('task-updated');
         closeDialog();
       } catch (error) {
-        console.error('Error creating task:', error);
+        console.error('Error updating task:', error);
       }
     };
 
@@ -157,7 +180,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.task-creation-card {
+.task-edit-card {
   max-width: 500px;
   margin: 0 auto;
 }
