@@ -143,8 +143,25 @@ class EmployeeList(APIView):
             return Response(employee_data)        
         else:
             return Response({'error': 'business_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = EmployeeSerializer(employees, many=True)
-        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = EmployeeSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                user = User.objects.get(id=request.data['user'])
+                business = Business.objects.get(id=request.data['business'])
+                team =  Team.objects.get(id=request.data['team'])
+                # Check if the user is the owner of the business
+                if business.owner != user:
+                    return Response({'error': 'User is not the owner of the business'}, status=status.HTTP_403_FORBIDDEN)
+                
+                employee = serializer.save(employee=user, business=business, team=team)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            except Business.DoesNotExist:
+                return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProjectList(APIView):
     authentication_classes = [JWTAuthentication]
@@ -389,14 +406,13 @@ class UserBusiness(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class UsernameSearch(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, search_string):
+    def get(self, request, username):
         try:
-            users = User.objects.filter(username__icontains=search_string)
+            users = User.objects.filter(username__icontains=username)
             serializer = UserSerializer(users, many=True)
             usernames = [user['username'] for user in serializer.data]
             return Response(usernames, status=status.HTTP_200_OK)      
