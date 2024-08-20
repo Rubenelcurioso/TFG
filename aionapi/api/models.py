@@ -49,7 +49,7 @@ class User(AbstractBaseUser):
     
 class Business(models.Model):
     email = models.EmailField(max_length=150, unique=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
     phone = models.CharField(max_length=20, null=True, blank=True)

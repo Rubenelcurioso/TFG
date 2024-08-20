@@ -17,12 +17,7 @@
           <q-separator dark spaced inset/>
           <ProjectsItem  />
 
-          <q-item clickable v-ripple @click="closeDrawer">
-            <q-item-section avatar>
-              <q-icon name="business" />
-            </q-item-section>
-            <q-item-section>Business</q-item-section>            
-          </q-item>
+          <BusinessItem />
 
 
           <q-separator dark spaced inset/>
@@ -41,11 +36,13 @@
   
 <script>
 import ProjectsItem from 'components/ProjectsItem.vue'
+import BusinessItem from 'components/BusinessItem.vue'
 import { useUserStore } from 'stores/user-store'
 export default {
   name: 'MainDrawer',
   components: {
-    ProjectsItem
+    ProjectsItem,
+    BusinessItem
   },
   props: {
     modelValue: {

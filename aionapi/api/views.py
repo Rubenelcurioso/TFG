@@ -72,10 +72,44 @@ class BusinessList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        businesses = Business.objects.all()
-        serializer = BusinessSerializer(businesses, many=True)
+    def get(self, request, business_id=None):
+        if business_id:
+            try:
+                business = Business.objects.get(id=business_id)
+                # Check if the user is an employee of the business
+                if not Employee.objects.filter(user=request.user, business=business).exists():
+                    return Response({'error': 'You are not an employee of this business'}, status=status.HTTP_403_FORBIDDEN)
+                serializer = BusinessSerializer(business)
+            except Business.DoesNotExist:
+                return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # Get businesses where the user is an employee
+            businesses = Business.objects.filter(employee__user=request.user)
+            serializer = BusinessSerializer(businesses, many=True)
         return Response(serializer.data)
+
+    def delete(self, request, business_id):
+        try:
+            business = Business.objects.get(id=business_id)
+            if business.owner != request.user:
+                return Response({'error': 'You do not have permission to delete this business'}, status=status.HTTP_403_FORBIDDEN)
+            
+            business.delete()
+            return Response({'message': 'Business deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        serializer = BusinessSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                user = User.objects.get(id=request.user.id)
+                business = serializer.save(owner=user)
+                Employee.objects.create(user=user, business=business)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TeamList(APIView):
     authentication_classes = [JWTAuthentication]
@@ -90,8 +124,25 @@ class EmployeeList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        employees = Employee.objects.all()
+    def get(self, request, business_id=None):
+        if business_id:
+            # Check if the user is an employee of the requested business
+            if not Employee.objects.filter(user=request.user, business_id=business_id).exists():
+                return Response({'error': 'You do not have permission to view employees of this business'}, status=status.HTTP_403_FORBIDDEN)
+            
+            employees = Employee.objects.filter(business_id=business_id).select_related('user', 'team')
+            employee_data = [
+                {
+                    'username': employee.user.username,
+                    'fullname': employee.user.fullname,
+                    'team_name': employee.team.name if employee.team else None,
+                    'avatar': employee.user.picture
+                }
+                for employee in employees
+            ]
+            return Response(employee_data)        
+        else:
+            return Response({'error': 'business_id is required'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = EmployeeSerializer(employees, many=True)
         return Response(serializer.data)
 
@@ -319,6 +370,22 @@ class ProjectUsers(APIView):
             serializer = UserSerializer(users, many=True)
             user_data = [{'id': user['id'], 'username': user['username']} for user in serializer.data]
             return Response(user_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserBusiness(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            # Check if the JWT token owner is the same as the user_id provided in the URL
+            if request.user.id != user_id:
+                return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+
+            user_businesses = Business.objects.filter(owner=user_id)
+            serializer = BusinessSerializer(user_businesses, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

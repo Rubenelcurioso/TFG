@@ -49,9 +49,20 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class BusinessSerializer(serializers.ModelSerializer):
+    owner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     class Meta:
         model = Business
         fields = '__all__'
+
+    def validate_email(self, value):
+        if Business.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A business with this email already exists.")
+        return value
+
+    def validate_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Name field cannot be empty.")
+        return value
 
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:

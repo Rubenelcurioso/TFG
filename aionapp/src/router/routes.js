@@ -86,6 +86,46 @@ const routes = [
   },
 
   {
+    path: '/new/business',
+    component: () => import('layouts/LoggedLayout.vue'),
+    meta: { requiresAuth: true },
+    beforeEnter: (to, from, next) => {
+      if (isTokenExpired(getRefreshToken(), getTimestampRefreshToken(), '1d')) {
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+      } else {
+        next()
+      }
+    },
+
+    children:  [
+      { path: '', component: () => import('pages/NewBusiness.vue') }
+    ]
+  },
+
+  {
+    path: '/home/:uid/business/:bid',
+    component: () => import('layouts/LoggedLayout.vue'),
+    meta: { requiresAuth: true },
+    beforeEnter: (to, from, next) => {
+      if (isTokenExpired(getRefreshToken(), getTimestampRefreshToken(), '1d')) {
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+      } else {
+        next()
+      }
+    },
+
+    children:  [
+      { path: '', component: () => import('pages/BusinessPage.vue') }
+    ]
+  },
+
+  {
   },
 
   // Always leave this as last one,

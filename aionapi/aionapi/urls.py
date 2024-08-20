@@ -16,29 +16,34 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
-from api.views import  UserDetail, ProjectUsers, UsernameSearch, UserProjects, UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
+from api.views import  UserBusiness, UserDetail, ProjectUsers, UsernameSearch, UserProjects, UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
 urlpatterns = [
     path('register/', UserRegistration.as_view(), name='register'), # Sign up session
     path('login/', UserLogin.as_view(), name='login'), # Log in session
     path('logout/', UserLogout.as_view(), name='logout'), # Log out session
-    path('businesses/', BusinessList.as_view(), name='business-list'),
-    path('teams/', TeamList.as_view(), name='team-list'),
-    path('employees/', EmployeeList.as_view(), name='employee-list'),
+    path('business/<int:business_id>/', BusinessList.as_view(), name='business-list'), # Get business
+    path('business/<int:business_id>/employees/', EmployeeList.as_view(), name='employee-business'), # Get employees from business
+    path('business/<int:business_id>/teams/', TeamList.as_view(), name='team-business'), # Get employees from business
+    path('employees/', EmployeeList.as_view(), name='employee-list'), # Get employees
     path('new/project/', ProjectList.as_view(), name='new-project'), # New project
-    path('roles/', RoleList.as_view(), name='role-list'),
+    path('new/business/', BusinessList.as_view(), name='new-business'), # New business
+    path('new/team/', TeamList.as_view(), name='new-team'), # New team
     path('new/task/', TaskList.as_view(), name='new-task'), # New task
     path('task/<int:task_id>/', TaskList.as_view(), name='update-task'), # Get task
     path('remove/task/<int:task_id>/', TaskList.as_view(), name='remove-task'), # Remove task
     path('update/task/<int:task_id>/', TaskList.as_view(), name='update-task'), # Update task
-    path('user-project-roles/', UserProjectRoleList.as_view(), name='user-project-role-list'), 
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # Token JWT refresh
     path('user/<int:user_id>/projects/', UserProjects.as_view(), name='user-projects'), # Projects of user
+    path('user/<int:user_id>/businesses/', UserBusiness.as_view(), name='user-projects'), # Businesses of user
     path('user/<int:user>/', UserDetail.as_view(), name='username-search'), # Search for username given ID
     path('user/<int:user_id>/tasks/', TaskList.as_view(), name='user-tasks'), # User tasks
     path('username/<str:username>/', UsernameSearch.as_view(), name='username-search'), # Search for username
     path('project/<int:project_id>/', ProjectList.as_view(), name='project'), # Project data
     path('project/<int:project_id>/users/', ProjectUsers.as_view(), name='project-users'), # Users of a project
-    path('project/<int:project_id>/teams/', UsernameSearch.as_view(), name='project-usernames'), # Teams of a project
+    path('project/<int:project_id>/teams/', UsernameSearch.as_view(), name='project-teams'), # Teams of a project
     path('project/<int:project_id>/tasks/', TaskList.as_view(), name='project-tasks'), # Tasks of a project
     path('remove/project/<int:project_id>/', ProjectList.as_view(), name='remove-project'), # Remove project
+    path('remove/business/<int:business_id>/', BusinessList.as_view(), name='remove-business'), # Remove business
+    path('remove/employee/<int:employee>/', EmployeeList.as_view(), name='remove-employee'), # Remove employee
+    path('remove/team/<int:team_id>/', TeamList.as_view(), name='remove-team'), # Remove team
 ]
