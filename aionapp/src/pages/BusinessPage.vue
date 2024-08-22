@@ -1,6 +1,5 @@
 <template>
   <q-page class="q-pa-md bg-dark text-white">
-    <!-- Business Information Section -->
     <q-card dark>
       <q-card-section>
         <div class="text-h6">Business Information</div>
@@ -30,7 +29,6 @@
       </q-card-actions>
     </q-card>
 
-    <!-- Employee Management Section -->
     <q-card class="q-mt-md" dark>
       <q-card-section>
         <div class="text-h6">Employee Management</div>
@@ -44,19 +42,21 @@
             <q-item-section>
               <q-item-label>{{ employee.username }}</q-item-label>
               <q-item-label caption>{{ employee.fullname }}</q-item-label>
-              <q-item-label caption>{{ employee.team_name }}</q-item-label>
-              <q-separator/>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn flat round color="negative" icon="delete" @click="deleteEmployee(employee.username)" />
             </q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn label="Add Employee" color="primary" @click="addEmployee" />
+        <q-btn label="Add Employee" color="primary" @click="showNewEmployeeDialog = true" />
+        <NewEmployee v-model="showNewEmployeeDialog" :bid="route.params.bid" @employee-added="showNewEmployeeDialog = false" />
       </q-card-actions>
     </q-card>
 
-    <!-- Team Management Section -->
+
     <q-card class="q-mt-md" dark>
       <q-card-section>
         <div class="text-h6">Team Management</div>
@@ -65,19 +65,21 @@
       <q-separator dark />
 
       <q-card-section>
-        <!-- Add team management content here -->
         <q-list dark>
           <q-item v-for="team in teams" :key="team.id" clickable v-ripple dark>
             <q-item-section>
               <q-item-label>{{ team.name }}</q-item-label>
-              <q-item-label caption>{{ team.members.length }} members</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn flat round color="negative" icon="delete" @click="deleteTeam(team.id)" />
             </q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn label="Create Team" color="primary" @click="createTeam" />
+        <q-btn label="Add Team" color="primary" @click="showNewTeamDialog = true" />
+        <NewTeam v-model="showNewTeamDialog" :bid="route.params.bid" @team-created="showNewTeamDialog = false" />
       </q-card-actions>
     </q-card>
   </q-page>
@@ -85,18 +87,26 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { apiGet, apiPut } from '../utils/api-wrapper'
+import { apiGet, apiPut, apiDelete } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store'
 import { useRoute } from 'vue-router'
+import NewTeam from 'components/NewTeam.vue'
+import NewEmployee from 'components/NewEmployee.vue'
 
 export default {
   name: 'BusinessPage',
+  components:{
+    NewTeam,
+    NewEmployee
+  },
   setup() {
     const business = ref({})
     const employees = ref([])
     const teams = ref([])
     const store = useUserStore()
     const route = useRoute()
+    const showNewTeamDialog = ref(false)
+    const showNewEmployeeDialog = ref(false)
 
     const fetchBusiness = async () => {
       try {
@@ -125,6 +135,24 @@ export default {
       }
     }
 
+    const deleteEmployee = async (employee) => {
+      try {
+        await apiDelete(`/remove/employee/${route.params.bid}/${employee}/`)
+        fetchEmployees()
+      } catch (error) {
+        console.error('Error deleting employee:', error)
+      }
+    }
+
+    const deleteTeam = async (teamId) => {
+      try {
+        await apiDelete(`/remove/team/${route.params.bid}/${teamId}/`)
+        fetchTeams()
+      } catch (error) {
+        console.error('Error deleting team:', error)
+      }
+    }
+
     const saveBusiness = async () => {
       try {
         await apiPut(`/business/${route.params.bid}/`, business.value)
@@ -133,13 +161,6 @@ export default {
       }
     }
 
-    const addEmployee = () => {
-      // Implement add employee functionality
-    }
-
-    const createTeam = () => {
-      // Implement create team functionality
-    }
 
     onMounted(() => {
       fetchBusiness()
@@ -153,8 +174,13 @@ export default {
       teams,
       store,
       saveBusiness,
-      addEmployee,
-      createTeam
+      NewTeam,
+      NewEmployee,
+      showNewTeamDialog,
+      showNewEmployeeDialog,
+      route,
+      deleteEmployee,
+      deleteTeam
     }
   }
 }

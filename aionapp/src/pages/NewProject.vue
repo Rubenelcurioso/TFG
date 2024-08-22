@@ -46,7 +46,16 @@
           <q-item-label header>Added Users</q-item-label>
           <q-item v-for="user in addedUsers" :key="user.id">
             <q-item-section>
-              <q-item-label>{{ user }}</q-item-label>
+              <q-item-label>{{ user.username }}</q-item-label>
+              <q-select
+                v-model="model"
+                :options="roleOptions"
+                label="Role"
+                dense
+                options-dense
+                dark
+                style="min-width: 50px;"
+              />
             </q-item-section>
             <q-item-section side>
               <q-btn flat round color="negative" icon="remove" @click="removeUserFromProject(user)" />
@@ -80,17 +89,30 @@ export default {
     const searchUser = ref('')
     const filteredUsers = ref([])
     const addedUsers = ref([])
+    const roleOptions = ref([])
+    const model = ref(null)
+
+    const fetchRoles = async () => {
+      try {
+        const response = await apiGet('/roles/');
+        roleOptions.value = response
+          .filter(role => role.name.toLowerCase() !== 'owner')
+          .map(role => ({ value: role.id, label: role.name }));      
+      } 
+        catch (error) {
+        console.error('Error fetching roles:', error);
+      }
+    }
+
+    fetchRoles();
     const store = useUserStore()
     const router = useRouter()
 
     const onSearchUser = async (val) => {
-      console.log(val)
       if (val.length >= 3) {
-        console.log("Searching for users with username:", val);
         try {
           const response = await apiGet('/username/' + encodeURIComponent(val) + '/');
           filteredUsers.value = response;
-          console.log("Filtered users:", filteredUsers.value);
         } catch (error) {
           console.error('Error searching for users:', error);
         }
@@ -99,9 +121,10 @@ export default {
       }
     }
 
-    const addUserToProject = (user) => {
-      if (!addedUsers.value.some(u => u.id === user.id)) {
-        addedUsers.value.push(user)
+    const addUserToProject = (username) => {
+      const currentUser = store.username; // Requester cannot be auto-added
+      if (username !== currentUser && !addedUsers.value.some(u => u === username)) {
+        addedUsers.value.push({ username, role: roleOptions.value[0].value })
       }
     }
 
@@ -124,9 +147,9 @@ export default {
         if (projectResponse && projectResponse.id) {
           for (const user of addedUsers.value) {
             const userProjectRoleData = {
-              user: user.id,
+              user: user.username,
               project: projectResponse.id,
-              role: 1 // Assuming role 1 is a default role, adjust as necessary
+              role: user.role
             };
             await apiPost('/userprojectrole/', userProjectRoleData);
           }
@@ -152,7 +175,9 @@ export default {
       onSearchUser,
       addUserToProject,
       removeUserFromProject,
-      createProject
+      createProject,
+      model,
+      roleOptions
     }
   }
 }

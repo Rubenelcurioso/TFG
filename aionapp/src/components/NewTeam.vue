@@ -158,7 +158,8 @@ export default {
             };
             await apiPut('/new/member/', memberData);
           }
-          dialogOpen.value = false
+          dialogOpen.value = false;
+          $emit('team-created');
         } else {
           throw new Error('Failed to create team');
         }

@@ -87,6 +87,19 @@ class BusinessList(APIView):
             businesses = Business.objects.filter(employee__user=request.user)
             serializer = BusinessSerializer(businesses, many=True)
         return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = BusinessSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                user = User.objects.get(id=request.user.id)
+                business = serializer.save(owner=user)
+                Employee.objects.create(user=user, business=business)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def delete(self, request, business_id):
         try:
@@ -115,10 +128,45 @@ class TeamList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        teams = Team.objects.all()
-        serializer = TeamSerializer(teams, many=True)
-        return Response(serializer.data)
+    def get(self, request, business_id):
+        try:
+            business = Business.objects.get(id=business_id)
+            if not Employee.objects.filter(user=request.user, business=business).exists():
+                return Response({'error': 'You are not an employee of this business'}, status=status.HTTP_403_FORBIDDEN)
+            teams = Team.objects.filter(business=business)
+            serializer = TeamSerializer(teams, many=True)
+            return Response(serializer.data)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        # Check if the user is the owner of the business
+        try:
+            business = Business.objects.get(id=request.data.get('business'))
+            if business.owner != request.user:
+                return Response({'error': 'You do not have permission to create a team'}, status=status.HTTP_403_FORBIDDEN)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = TeamSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, business_id, team_id):
+        try:
+            business = Business.objects.get(id=business_id)
+            if business.owner != request.user:
+                return Response({'error': 'You do not have permission to delete this team'}, status=status.HTTP_403_FORBIDDEN)
+
+            team = Team.objects.get(id=team_id, business=business)
+            team.delete()
+            return Response({'message': 'Team deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Team.DoesNotExist:
+            return Response({'error': 'Team not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class EmployeeList(APIView):
     authentication_classes = [JWTAuthentication]
@@ -145,24 +193,94 @@ class EmployeeList(APIView):
             return Response({'error': 'business_id is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
-        serializer = EmployeeSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                user = User.objects.get(id=request.data['user'])
-                business = Business.objects.get(id=request.data['business'])
-                team =  Team.objects.get(id=request.data['team'])
-                # Check if the user is the owner of the business
-                if business.owner != user:
-                    return Response({'error': 'User is not the owner of the business'}, status=status.HTTP_403_FORBIDDEN)
-                
-                employee = serializer.save(employee=user, business=business, team=team)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except User.DoesNotExist:
-                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-            except Business.DoesNotExist:
-                return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        username = request.data.get('username')
+        business_id = request.data.get('business')
+        team_id = request.data.get('team')
 
+        try:
+            user = User.objects.get(username=username)
+            business = Business.objects.get(id=business_id)
+            team = Team.objects.get(id=team_id) if team_id else None
+
+            # Check if the requesting user is the owner of the business
+            if business.owner != request.user:
+                return Response({'error': 'You do not have permission to add employees to this business'}, status=status.HTTP_403_FORBIDDEN)
+
+            # Check if the user is already an employee of the business
+            if Employee.objects.filter(user=user, business=business).exists():
+                return Response({'error': 'User is already an employee of this business'}, status=status.HTTP_400_BAD_REQUEST)
+
+            employee = Employee.objects.create(user=user, business=business, team=team)
+            serializer = EmployeeSerializer(employee)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Team.DoesNotExist:
+            return Response({'error': 'Team not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request):
+        business_id = request.data.get('business')
+        username = request.data.get('username')
+        team_id = request.data.get('team')
+
+        try:
+            business = Business.objects.get(id=business_id)
+            if business.owner != request.user:
+                return Response({'error': 'You do not have permission to update employees in this business'}, status=status.HTTP_403_FORBIDDEN)
+
+            user = User.objects.get(username=username)
+            employee = Employee.objects.get(user=user, business=business)
+
+            if team_id:
+                team = Team.objects.get(id=team_id)
+                employee.team = team
+                employee.save()
+
+            serializer = EmployeeSerializer(employee)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Employee.DoesNotExist:
+            return Response({'error': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Team.DoesNotExist:
+            return Response({'error': 'Team not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, username=None, business_id=None):
+        if not business_id:
+            return Response({'error': 'Business ID must be specified'}, status=status.HTTP_400_BAD_REQUEST)
+        if not username:
+            return Response({'error': 'Username must be specified'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            business = Business.objects.get(id=business_id)
+            if business.owner != request.user:
+                return Response({'error': 'You do not have permission to delete this employee'}, status=status.HTTP_403_FORBIDDEN)
+
+            user = User.objects.get(username=username)
+            employee = Employee.objects.get(user=user, business=business)
+
+            if employee.user == business.owner:
+                # If the owner is being removed, find the next employee to be the new owner
+                next_employee = Employee.objects.filter(business=business).exclude(user=user).first()
+                if next_employee:
+                    business.owner = next_employee.user
+                    business.save()
+                else:
+                    return Response({'error': 'Cannot remove the last employee (owner) of the business'}, status=status.HTTP_400_BAD_REQUEST)
+
+            employee.delete()
+            return Response({'message': 'Employee deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Employee.DoesNotExist:
+            return Response({'error': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
+        
 class ProjectList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -206,7 +324,7 @@ class ProjectList(APIView):
     
 class RoleList(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         roles = Role.objects.all()
@@ -345,10 +463,46 @@ class UserProjectRoleList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        user_project_roles = UserProjectRole.objects.all()
+    def get(self, request, project_id=None):
+        if not project_id:
+            return Response({'error': 'project_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the requester user is on the specified project
+        user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
+        if not user_project_role:
+            return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
+
+        user_project_roles = UserProjectRole.objects.filter(project_id=project_id)
         serializer = UserProjectRoleSerializer(user_project_roles, many=True)
         return Response(serializer.data)
+
+    def post(self, request):
+        # Check if the user has sufficient permissions on the project
+        project_id = request.data.get('project')
+        user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
+        if not user_project_role or user_project_role.role.perm < 31:
+            return Response({'error': 'You do not have sufficient permissions to create a user project role'}, status=status.HTTP_403_FORBIDDEN)
+
+        username = request.data.get('user')
+        project_id = request.data.get('project')
+        role_id = request.data.get('role')
+
+        try:
+            user = User.objects.get(username=username)
+            project = Project.objects.get(id=project_id)
+            role = Role.objects.get(id=role_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Project.DoesNotExist:
+            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Role.DoesNotExist:
+            return Response({'error': 'Role not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        user_project_role, created = UserProjectRole.objects.get_or_create(user=user, project=project, role=role)
+        if created:
+            return Response(UserProjectRoleSerializer(user_project_role).data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': 'UserProjectRole already exists'}, status=status.HTTP_400_BAD_REQUEST)
     
 class UserProjects(APIView):
     authentication_classes = [JWTAuthentication]
@@ -410,11 +564,36 @@ class UsernameSearch(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, username):
+    def get(self, request, username, business_id=None):
         try:
-            users = User.objects.filter(username__icontains=username)
+            print("Starting username search")
+            if 'employees/username/' in request.path:
+                print("Searching for employees")
+                # Get the business of the requester
+                if business_id:
+                    business = Business.objects.filter(id=business_id).first()
+
+                    if not business:
+                        return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)  
+                    
+                    requester_business = Employee.objects.filter(user=request.user, business=business).first()
+                    print(f"Requester's business: {requester_business}")
+                    # Get employees of the same business
+                    employees = Employee.objects.filter(business=business)
+                    print(f"Number of employees in the same business: {employees.count()}")
+                    # Get users who are employees of the same business and match the username
+                    users = User.objects.filter(username__icontains=username, employee__in=employees)
+                    print(f"Number of matching users: {users.count()}")
+                else:
+                    return Response({'error': 'Business ID is required for employee search'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                print("Searching for all users")
+                users = User.objects.filter(username__icontains=username)
+                print(f"Number of matching users: {users.count()}")
+            
             serializer = UserSerializer(users, many=True)
             usernames = [user['username'] for user in serializer.data]
+            print(f"Matching usernames: {usernames}")
             return Response(usernames, status=status.HTTP_200_OK)      
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
