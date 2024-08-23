@@ -46,6 +46,7 @@ urlpatterns = [
     path('project/<int:project_id>/users/', ProjectUsers.as_view(), name='project-users'), # Users of a project
     path('project/<int:project_id>/teams/', TeamList.as_view(), name='project-teams'), # Teams of a project
     path('project/<int:project_id>/tasks/', TaskList.as_view(), name='project-tasks'), # Tasks of a project
+    path('project/update/', ProjectList.as_view(), name='update-project'), # Update project
     path('remove/project/<int:project_id>/', ProjectList.as_view(), name='remove-project'), # Remove project
     path('remove/business/<int:business_id>/', BusinessList.as_view(), name='remove-business'), # Remove business
     path('remove/task/<int:task_id>/', TaskList.as_view(), name='remove-task'), # Remove task

@@ -71,8 +71,8 @@ class Employee(models.Model):
 class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    start_date = models.DateTimeField(default=timezone.now)
-    end_date = models.DateTimeField()
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField()
     progress = models.FloatField(default=0.0)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     business = models.ForeignKey(Business, on_delete=models.SET_NULL, null=True, blank=True)

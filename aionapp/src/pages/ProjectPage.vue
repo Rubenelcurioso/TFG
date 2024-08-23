@@ -13,17 +13,22 @@
 
     <q-tab-panels v-model="tab" animated>
       <q-tab-panel name="properties">
-        <div class="text-h6">Project Properties</div>
-        <p>Project description: {{ description }}</p>
-        <p>Created at: {{ createdAt }}</p>
-        <p>End date: {{ endDate }}</p>
-        <p>Progress: {{ progress }}</p>
+        <ProjectInfo
+          :pid=Number(route.params.pid)
+          :description="description"
+          :createdAt=createdAt
+          :endDate=endDate
+          :progress="progress"
+          :linkedBusiness="linkedBusiness"
+          :editProjectDialog="editProjectDialog"
+        />
       </q-tab-panel>
 
       <q-tab-panel name="tasks">
         <TaskTable />      
       </q-tab-panel>
     </q-tab-panels>
+
   </q-page>
 </template>
 
@@ -31,13 +36,15 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import TaskTable from 'components/TaskTable.vue';
+import ProjectInfo from 'components/ProjectInfo.vue';
 import { apiGet } from '../utils/api-wrapper';
 import { useUserStore } from 'stores/user-store';
 
 export default defineComponent({
   name: 'ProjectPage',
   components: {
-    TaskTable
+    TaskTable,
+    ProjectInfo
   },
   setup() {
     const route = useRoute();
@@ -48,6 +55,7 @@ export default defineComponent({
     const endDate = ref('')
     const description = ref('')
     const progress = ref(0.00)
+    const linkedBusiness = ref('')
     const store = useUserStore();
 
     const fetchProjectData = async () => {
@@ -57,6 +65,7 @@ export default defineComponent({
       endDate.value = response.end_date;
       description.value = response.description;
       progress.value = response.progress;
+      linkedBusiness.value = response.business_name;
     }
 
     onMounted(fetchProjectData);
@@ -67,7 +76,9 @@ export default defineComponent({
       createdAt,
       endDate,
       progress,
-      description
+      description,
+      route,
+      linkedBusiness
     }
   }
 });

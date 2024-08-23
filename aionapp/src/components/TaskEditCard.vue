@@ -7,16 +7,16 @@
 
     <q-form @submit="onSubmit" class="q-gutter-md">
       <q-card-section>
-        <q-input v-model="taskName" label="Task Name" :rules="taskNameRules" />
+        <q-input v-model="taskName" label="Task name" :rules="taskNameRules" />
       </q-card-section>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-input v-model="startDate" label="Start Date" type="date" :rules="startDateRules" />
+            <q-input v-model="startDate" label="Start date" type="date" :rules="startDateRules" />
           </div>
           <div class="col-6">
-            <q-input v-model="endDate" label="End Date" type="date" :rules="endDateRules" />
+            <q-input v-model="endDate" label="End date" type="date" :rules="endDateRules" />
           </div>
         </div>
       </q-card-section>

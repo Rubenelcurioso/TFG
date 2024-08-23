@@ -340,10 +340,13 @@ class ProjectList(APIView):
     def get(self, request, project_id=None):
         if project_id:
             try:
-                project = Project.objects.get(id=project_id)
+                project = Project.objects.select_related('business').get(id=project_id)
                 if not UserProjectRole.objects.filter(user=request.user, project=project).exists():
                     return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
                 serializer = ProjectSerializer(project)
+                response_data = serializer.data
+                response_data['business_name'] = project.business.name if project.business else None
+                return Response(response_data)
             except Project.DoesNotExist:
                 return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
@@ -361,6 +364,23 @@ class ProjectList(APIView):
             UserProjectRole.objects.create(user=User.objects.get(id=project.owner_id), project=project, role=Role.objects.get(name='Owner'))            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request):
+        project_id = request.data.get('project_id')
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if project.owner != request.user:
+            return Response({'error': 'You do not have permission to update this project'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = ProjectSerializer(project, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     
 class RoleList(APIView):
     authentication_classes = [JWTAuthentication]
@@ -436,7 +456,7 @@ class TaskList(APIView):
                 'start_date': task.start_date,
                 'end_date': task.end_date,
                 'status': task.get_status_display(),                
-                'team': task.team_assigned.name if task.team_assigned else None
+                'team': task.team_assigned.name if task.team_assigned else None,
             }
             return Response(task_info)
         
