@@ -563,6 +563,74 @@ class UserProjectRoleList(APIView):
             return Response(UserProjectRoleSerializer(user_project_role).data, status=status.HTTP_201_CREATED)
         else:
             return Response({'error': 'UserProjectRole already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, project_id=None, username=None):
+        if not project_id or not username:
+            return Response({'error': 'project_id and username are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the requester is on the same project
+        requester_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
+        if not requester_role:
+            return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Get the user to be deleted
+        try:
+            user_to_delete = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get the role of the user to be deleted
+        user_to_delete_role = UserProjectRole.objects.filter(user=user_to_delete, project_id=project_id).first()
+        if not user_to_delete_role:
+            return Response({'error': 'User to delete is not on this project'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the requester has higher role permissions
+        if requester_role.role.perm <= user_to_delete_role.role.perm:
+            return Response({'error': 'You do not have sufficient permissions to delete this user from the project'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Delete the user's role from the project
+        user_to_delete_role.delete()
+        return Response({'message': 'User removed from project successfully'}, status=status.HTTP_200_OK)
+        
+    def put(self, request):
+        project_id = request.data.get('project')
+        if not project_id:
+            return Response({'error': 'project_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the user has sufficient permissions on the project
+        requester_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
+        if not requester_role or requester_role.role.perm < 31:
+            return Response({'error': 'You do not have sufficient permissions to update a user project role'}, status=status.HTTP_403_FORBIDDEN)
+
+        username = request.data.get('user')
+        role_id = request.data.get('role')
+
+        try:
+            user = User.objects.get(username=username)
+            project = Project.objects.get(id=project_id)
+            role = Role.objects.get(id=role_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Project.DoesNotExist:
+            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Role.DoesNotExist:
+            return Response({'error': 'Role not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the user to be modified exists in the project
+        user_to_modify_role = UserProjectRole.objects.filter(user=user, project=project).first()
+        if user_to_modify_role:
+            # Check if the requester has higher role permissions than the user to be modified
+            if requester_role.role.perm <= user_to_modify_role.role.perm:
+                return Response({'error': 'You do not have sufficient permissions to modify this user\'s role'}, status=status.HTTP_403_FORBIDDEN)
+
+        user_project_role, created = UserProjectRole.objects.update_or_create(
+            user=user,
+            project=project,
+            defaults={'role': role}
+        )
+
+        serializer = UserProjectRoleSerializer(user_project_role)
+        return Response(serializer.data)
     
 class UserProjects(APIView):
     authentication_classes = [JWTAuthentication]
@@ -595,11 +663,15 @@ class ProjectUsers(APIView):
             if not UserProjectRole.objects.filter(user=request.user, project_id=project_id).exists():
                 return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
 
-            user_project_roles = UserProjectRole.objects.filter(project_id=project_id)
-            user_ids = user_project_roles.values_list('user_id', flat=True)
-            users = User.objects.filter(id__in=user_ids)
-            serializer = UserSerializer(users, many=True)
-            user_data = [{'id': user['id'], 'username': user['username']} for user in serializer.data]
+            user_project_roles = UserProjectRole.objects.filter(project_id=project_id).select_related('user', 'role')
+            user_data = []
+            for upr in user_project_roles:
+                user_data.append({
+                    'username': upr.user.username,
+                    'role_id': upr.role.id if upr.role else None,
+                    'role_perm': upr.role.perm if upr.role else None,
+                    'role_name': upr.role.name if upr.role else None
+                })
             return Response(user_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

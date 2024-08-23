@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-h6">Project Properties</div>
+    <div class="text-h6">Project properties</div>
     <q-btn label="Edit Project" color="primary" @click="editProjectDialog" />
     <p>Project description: {{ description }}</p>
     <p>Created at: {{ createdAt }}</p>

@@ -52,6 +52,8 @@ urlpatterns = [
     path('remove/task/<int:task_id>/', TaskList.as_view(), name='remove-task'), # Remove task
     path('remove/employee/<int:business_id>/<str:username>/', EmployeeList.as_view(), name='remove-employee'), # Remove employee
     path('remove/team/<int:business_id>/<int:team_id>/', TeamList.as_view(), name='remove-team'), # Remove team
+    path('remove/user/<str:username>/<int:project_id>/', UserProjectRoleList.as_view(), name='remove-user'), # Remove user from a project
     path('roles/', RoleList.as_view(), name='role-list'), # Get roles
+    path('userprojectrole/update/', UserProjectRoleList.as_view(), name='userprojectrole-update'), # Update UserProjectRole
     path('userprojectrole/', UserProjectRoleList.as_view(), name='userprojectrole-list'), # Create UserProjectRole
 ]

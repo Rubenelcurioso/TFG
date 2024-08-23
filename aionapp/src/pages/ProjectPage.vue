@@ -9,6 +9,7 @@
     >
       <q-tab name="properties" label="Properties" />
       <q-tab name="tasks" label="Tasks" />
+      <q-tab name="userManagement" label="User Management" />
     </q-tabs>
 
     <q-tab-panels v-model="tab" animated>
@@ -20,12 +21,16 @@
           :endDate=endDate
           :progress="progress"
           :linkedBusiness="linkedBusiness"
-          :editProjectDialog="editProjectDialog"
         />
       </q-tab-panel>
 
       <q-tab-panel name="tasks">
         <TaskTable />      
+      </q-tab-panel>
+      <q-tab-panel name="userManagement">
+        <UserProjectManagement
+          :pid=Number(route.params.pid)
+        />
       </q-tab-panel>
     </q-tab-panels>
 
@@ -37,6 +42,7 @@ import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import TaskTable from 'components/TaskTable.vue';
 import ProjectInfo from 'components/ProjectInfo.vue';
+import UserProjectManagement from 'components/UserProjectManagement.vue';
 import { apiGet } from '../utils/api-wrapper';
 import { useUserStore } from 'stores/user-store';
 
@@ -44,7 +50,8 @@ export default defineComponent({
   name: 'ProjectPage',
   components: {
     TaskTable,
-    ProjectInfo
+    ProjectInfo,
+    UserProjectManagement
   },
   setup() {
     const route = useRoute();
