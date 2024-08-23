@@ -1,22 +1,23 @@
 <template>
-  <q-dialog v-model="dialogOpen" persistent>
-    <q-card class="bg-dark text-white">
-      <q-stepper
-        v-model="step"
-        color="primary"
-        animated
-        dark
-      >
+  <q-card class="team-edit-card primary">
+    <q-toolbar>
+      <q-toolbar-title>Edit Team</q-toolbar-title>
+      <q-btn flat round dense icon="close" @click="closeDialog" />
+    </q-toolbar>
+
+    <q-stepper
+      v-model="step"
+      color="primary"
+      animated
+      dark
+    >
       <q-step
         :name="1"
         title="Team Details"
         icon="people"
         :done="step > 1"
       >
-        <q-input dark v-model="teamName" label="Team Name" :rules="[
-          val => val && val.length > 0 || 'Team name is required',
-          val => val.length <= 255 || 'Team name too long'
-        ]" />
+        <q-input dark v-model="teamName" label="Team Name" :rules="teamNameRules" />
         <q-input dark v-model="teamDescription" type="textarea" label="Team Description" />
         
         <q-stepper-navigation>
@@ -78,39 +79,48 @@
 
         <q-stepper-navigation>
           <q-btn flat @click="step = 1" color="primary" label="Back" class="q-mr-sm" />
-          <q-btn @click="createTeam" color="primary" label="Create Team" />
+          <q-btn @click="onSubmit" color="primary" label="Update Team" />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
-    <q-card-actions align="right">
-      <q-btn flat label="Close" color="primary" v-close-popup />
-    </q-card-actions>
   </q-card>
-  </q-dialog>
 </template>
 
 <script>
-import { ref } from 'vue'
-import { apiPost, apiGet, apiPut } from '../utils/api-wrapper'
-import { useUserStore } from 'stores/user-store';
+import { ref, onMounted } from 'vue';
+import { apiGet, apiPut } from '../utils/api-wrapper';
 
 export default {
-  name: 'NewTeam',
+  name: 'TeamEditCard',
   props: {
+    team: {
+      type: Number,
+      required: true
+    },
     bid: {
-      type: String,
+      type: Number,
       required: true
     }
   },
-  setup(props) {
-    const dialogOpen = ref(true)
-    const step = ref(1)
-    const teamName = ref('')
-    const teamDescription = ref('')
-    const searchUser = ref('')
-    const filteredUsers = ref([])
-    const addedMembers = ref([])
+  setup(props, { emit }) {
+    const step = ref(1);
+    const teamName = ref('');
+    const teamDescription = ref('');
+    const searchUser = ref('');
+    const filteredUsers = ref([]);
+    const addedMembers = ref([]);
 
+    const loadTeamData = async () => {
+      try {
+        const response = await apiGet(`/team/${props.bid}/${props.team}/`);
+        teamName.value = response.name;
+        teamDescription.value = response.description;
+        const res = await apiGet(`/employees/${props.bid}/${props.team}/`);
+        addedMembers.value = res.map(member => member.username);
+      } catch (error) {
+        console.error('Error loading team data:', error);
+      }
+    };
 
     const onSearchUser = async (val) => {
       if (val.length >= 3) {
@@ -123,63 +133,96 @@ export default {
       } else {
         filteredUsers.value = [];
       }
-    }
+    };
 
-    const addUserToTeam = (username) => {
+    const addUserToTeam = async (username) => {
       if (!addedMembers.value.some(u => u === username)) {
         addedMembers.value.push(username);
+        const memberData = {
+          business: props.bid,
+          username: username,
+          team: props.team
+        };
+        await apiPut(`/new/member/`, memberData);
       }
-    }
+    };
 
-    const removeUserFromTeam = (user) => {
-      addedMembers.value = addedMembers.value.filter(u => u.id !== user.id)
-    }
+    const removeUserFromTeam = async (user) => {
+      const memberData = {
+        business: props.bid,
+        username: user,
+        team: null
+      };
+      await apiPut(`/new/member/`, memberData);
+      addedMembers.value = addedMembers.value.filter(u => u.id !== user.id);
+    };
 
-    const store = useUserStore()
+    onMounted(() => {
+      loadTeamData();
+    });
 
-    const createTeam = async () => {
+    const teamNameRules = [
+      val => !!val || 'Team name is required'
+    ];
+
+    const onSubmit = async () => {
       try {
         const teamData = {
+          id: props.team,
           name: teamName.value,
           description: teamDescription.value,
-          business: props.bid
         };
-
-        const teamResponse = await apiPost('/new/team/', teamData);
-
-        if (teamResponse && teamResponse.id) {
-          for (const username of addedMembers.value) {
-            const memberData = {
-              business: props.bid,
-              username: username,
-              team: teamResponse.id
-            };
-            await apiPut('/new/member/', memberData);
-          }
-          dialogOpen.value = false;
-          $emit('team-created');
-        } else {
-          throw new Error('Failed to create team');
-        }
+        await apiPut(`/team/update/`, teamData);      
+        emit('team-updated');
+        closeDialog();
       } catch (error) {
-        console.error('Error creating team:', error);
-        // Handle error (e.g., show error message to user)
+        console.error('Error updating team:', error);
       }
-    }
+    };
+
+    const closeDialog = () => {
+      emit('close-dialog');
+    };
 
     return {
-      dialogOpen,
       step,
       teamName,
       teamDescription,
       searchUser,
       filteredUsers,
       addedMembers,
+      teamNameRules,
       onSearchUser,
       addUserToTeam,
       removeUserFromTeam,
-      createTeam
-    }
-  }
-}
+      onSubmit,
+      closeDialog
+    };
+  },
+};
 </script>
+
+<style scoped lang="scss">
+.team-edit-card {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $dark;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+</style>

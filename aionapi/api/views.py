@@ -128,14 +128,23 @@ class TeamList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, business_id):
+    def get(self, request, business_id, team_id=None):
         try:
             business = Business.objects.get(id=business_id)
             if not Employee.objects.filter(user=request.user, business=business).exists():
                 return Response({'error': 'You are not an employee of this business'}, status=status.HTTP_403_FORBIDDEN)
-            teams = Team.objects.filter(business=business)
-            serializer = TeamSerializer(teams, many=True)
-            return Response(serializer.data)
+            
+            if team_id:
+                try:
+                    team = Team.objects.get(id=team_id, business=business)
+                    serializer = TeamSerializer(team)
+                    return Response(serializer.data)
+                except Team.DoesNotExist:
+                    return Response({'error': 'Team not found'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                teams = Team.objects.filter(business=business)
+                serializer = TeamSerializer(teams, many=True)
+                return Response(serializer.data)
         except Business.DoesNotExist:
             return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -153,6 +162,30 @@ class TeamList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        try:
+            team_id = request.data.get('id')
+
+            if not team_id:
+                return Response({'error': 'Team ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+            team = Team.objects.get(id=team_id)
+            
+            if team.business.owner != request.user:
+                return Response({'error': 'You do not have permission to update this team'}, status=status.HTTP_403_FORBIDDEN)
+            
+            serializer = TeamSerializer(team, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'id': serializer.data['id'],
+                    'name': serializer.data['name'],
+                    'description': serializer.data['description']
+                })
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Team.DoesNotExist:
+            return Response({'error': 'Team not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, business_id, team_id):
         try:
@@ -172,25 +205,29 @@ class EmployeeList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, business_id=None):
-        if business_id:
-            # Check if the user is an employee of the requested business
-            if not Employee.objects.filter(user=request.user, business_id=business_id).exists():
-                return Response({'error': 'You do not have permission to view employees of this business'}, status=status.HTTP_403_FORBIDDEN)
-            
-            employees = Employee.objects.filter(business_id=business_id).select_related('user', 'team')
-            employee_data = [
-                {
-                    'username': employee.user.username,
-                    'fullname': employee.user.fullname,
-                    'team_name': employee.team.name if employee.team else None,
-                    'avatar': employee.user.picture
-                }
-                for employee in employees
-            ]
-            return Response(employee_data)        
-        else:
+    def get(self, request, business_id=None, team_id=None):
+        if not business_id:
             return Response({'error': 'business_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the user is an employee of the requested business
+        if not Employee.objects.filter(user=request.user, business_id=business_id).exists():
+            return Response({'error': 'You do not have permission to view employees of this business'}, status=status.HTTP_403_FORBIDDEN)
+
+        employees = Employee.objects.filter(business_id=business_id).select_related('user', 'team')
+
+        if team_id:
+            employees = employees.filter(team_id=team_id)
+
+        employee_data = [
+            {
+                'username': employee.user.username,
+                'fullname': employee.user.fullname,
+                'team_name': employee.team.name if employee.team else None,
+                'avatar': employee.user.picture
+            }
+            for employee in employees
+        ]
+        return Response(employee_data)
 
     def post(self, request):
         username = request.data.get('username')
@@ -235,8 +272,11 @@ class EmployeeList(APIView):
 
             if team_id:
                 team = Team.objects.get(id=team_id)
-                employee.team = team
-                employee.save()
+            else:
+                team = None
+
+            employee.team = team
+            employee.save()
 
             serializer = EmployeeSerializer(employee)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -426,8 +466,8 @@ class TaskList(APIView):
             return Response(task_data)
         
         elif user_id:
-            # Get tasks for the user making the request
-            tasks = Task.objects.filter(user_assigned=request.user).select_related('user_assigned', 'team_assigned', 'project')
+            # Get tasks for the user making the request, excluding tasks with status DONE
+            tasks = Task.objects.filter(user_assigned=request.user).exclude(status='DONE').select_related('user_assigned', 'team_assigned', 'project')
             
             task_data = []
             for task in tasks:

@@ -66,12 +66,13 @@
 
       <q-card-section>
         <q-list dark>
-          <q-item v-for="team in teams" :key="team.id" clickable v-ripple dark>
+          <q-item v-for="team in teams" :key="team.id" clickable v-ripple dark @click="openTeamEditDialog(team)">
             <q-item-section>
+
               <q-item-label>{{ team.name }}</q-item-label>
             </q-item-section>
             <q-item-section side>
-              <q-btn flat round color="negative" icon="delete" @click="deleteTeam(team.id)" />
+              <q-btn flat round color="negative" icon="delete" @click.stop="deleteTeam(team.id)" />
             </q-item-section>
           </q-item>
         </q-list>
@@ -82,6 +83,12 @@
         <NewTeam v-model="showNewTeamDialog" :bid="route.params.bid" @team-created="showNewTeamDialog = false" />
       </q-card-actions>
     </q-card>
+
+
+    <q-dialog v-model="editDialogVisible">
+      <TeamEditCard :team="selectedTeam" :bid="route.params.bid" @close="editDialogVisible = false" />
+    </q-dialog>
+    
   </q-page>
 </template>
 
@@ -92,12 +99,14 @@ import { useUserStore } from 'stores/user-store'
 import { useRoute } from 'vue-router'
 import NewTeam from 'components/NewTeam.vue'
 import NewEmployee from 'components/NewEmployee.vue'
+import TeamEditCard from 'components/TeamEditCard.vue'
 
 export default {
   name: 'BusinessPage',
   components:{
     NewTeam,
-    NewEmployee
+    NewEmployee,
+    TeamEditCard
   },
   setup() {
     const business = ref({})
@@ -105,8 +114,10 @@ export default {
     const teams = ref([])
     const store = useUserStore()
     const route = useRoute()
+    const editDialogVisible = ref(false)
     const showNewTeamDialog = ref(false)
     const showNewEmployeeDialog = ref(false)
+    const selectedTeam = ref(null)
 
     const fetchBusiness = async () => {
       try {
@@ -161,6 +172,10 @@ export default {
       }
     }
 
+    const openTeamEditDialog = (team) => {
+      selectedTeam.value = team.id
+      editDialogVisible.value = true
+    }
 
     onMounted(() => {
       fetchBusiness()
@@ -176,11 +191,15 @@ export default {
       saveBusiness,
       NewTeam,
       NewEmployee,
+      TeamEditCard,
       showNewTeamDialog,
       showNewEmployeeDialog,
       route,
       deleteEmployee,
-      deleteTeam
+      deleteTeam,
+      editDialogVisible,
+      selectedTeam,
+      openTeamEditDialog
     }
   }
 }

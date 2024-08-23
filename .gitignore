@@ -114,6 +114,7 @@ logs
 .env.*
 .env*
 !.env.example
+.env-aider
 
 # Cody ignore
 .cody

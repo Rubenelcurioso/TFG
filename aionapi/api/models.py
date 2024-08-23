@@ -75,6 +75,7 @@ class Project(models.Model):
     end_date = models.DateTimeField()
     progress = models.FloatField(default=0.0)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    business = models.ForeignKey(Business, on_delete=models.SET_NULL, null=True, blank=True)
 
     def clean(self):
         if self.start_date and self.end_date and self.start_date > self.end_date:
