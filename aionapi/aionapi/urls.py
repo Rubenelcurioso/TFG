@@ -21,6 +21,7 @@ urlpatterns = [
     path('register/', UserRegistration.as_view(), name='register'), # Sign up session
     path('login/', UserLogin.as_view(), name='login'), # Log in session
     path('logout/', UserLogout.as_view(), name='logout'), # Log out session
+    path('business/update/', BusinessList.as_view(), name='business-update'), # Update business
     path('business/<int:business_id>/', BusinessList.as_view(), name='business-list'), # Get business
     path('business/<int:business_id>/employees/', EmployeeList.as_view(), name='employee-business'), # Get employees from business
     path('business/<int:business_id>/teams/', TeamList.as_view(), name='team-business'), # Get team from business

@@ -100,6 +100,21 @@ class BusinessList(APIView):
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request):
+        try:
+            business_id = request.data.get('business')
+            print(business_id)
+            business = Business.objects.get(id=business_id)
+            # Check if the user is the owner of the business
+            if business.owner != request.user:
+                return Response({'error': 'You are not authorized to update this business'}, status=status.HTTP_403_FORBIDDEN)
+            serializer = BusinessSerializer(business, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Business.DoesNotExist:
+            return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, business_id):
         try:
@@ -111,18 +126,6 @@ class BusinessList(APIView):
             return Response({'message': 'Business deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Business.DoesNotExist:
             return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    def post(self, request):
-        serializer = BusinessSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                user = User.objects.get(id=request.user.id)
-                business = serializer.save(owner=user)
-                Employee.objects.create(user=user, business=business)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except User.DoesNotExist:
-                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TeamList(APIView):
     authentication_classes = [JWTAuthentication]

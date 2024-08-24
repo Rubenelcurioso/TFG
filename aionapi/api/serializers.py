@@ -55,7 +55,11 @@ class BusinessSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_email(self, value):
-        if Business.objects.filter(email=value).exists():
+        # Get the current instance if it exists (it will exist for updates)
+        instance = getattr(self, 'instance', None)
+        
+        # Check if the email exists, excluding the current instance
+        if Business.objects.filter(email=value).exclude(pk=instance.pk if instance else None).exists():
             raise serializers.ValidationError("A business with this email already exists.")
         return value
 
