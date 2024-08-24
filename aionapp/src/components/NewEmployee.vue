@@ -1,26 +1,26 @@
 <template>
-  <q-dialog v-model="dialogOpen" persistent>
-    <q-card class="bg-dark text-white">
+  <q-dialog v-model="dialogOpen" persistent backdrop-filter="blur(10px)">
+    <q-card class="bg-purple-2 text-accent">
       <q-card-section>
-        <q-input dark v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
+        <q-input outlined color="accent" text-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-list bordered separator dark>
+        <q-list bordered separator class="bg-purple-1">
           <q-item v-for="user in filteredUsers" :key="user.id" clickable v-ripple @click="addUserToBusiness(user)">
             <q-item-section>
-              <q-item-label>{{ user }}</q-item-label>
+              <q-item-label class="text-accent">{{ user }}</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
 
-        <q-list bordered class="q-mt-md" dark>
-          <q-item-label header>Added Members</q-item-label>
+        <q-list bordered class="q-mt-md" >
+          <q-item-label header class="text-accent bg-purple-3">Added Members</q-item-label>
           <q-item v-for="user in addedMembers" :key="user.id">
             <q-item-section>
-              <q-item-label>{{ user }}</q-item-label>
+              <q-item-label class="text-accent">{{ user }}</q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-btn flat round color="negative" icon="remove" @click="removeUserFromTeam(user)" />
@@ -30,8 +30,8 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn label="Add" color="primary" @click="onSubmit" />
-        <q-btn flat label="Close" color="primary" v-close-popup />
+        <q-btn rounded unelevated label="Add" color="positive" text-color="accent" @click="onSubmit" />
+        <q-btn flat rounded unelevated label="Close" color="negative" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>

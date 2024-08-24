@@ -1,47 +1,47 @@
 <template>
-  <q-page class="q-pa-md bg-dark text-white">
+  <q-page class="q-pa-md bg-primary text-white">
     <q-card dark>
-      <q-card-section>
-        <div class="text-h6">Business information</div>
+      <q-card-section class="bg-purple-3">
+        <div class="text-h6 text-accent">Business information</div>
       </q-card-section>
 
       <q-separator dark />
 
-      <q-card-section>
-        <div class="text-h6">{{ business.name }}</div>
-        <div class="text-subtitle2">{{ business.location }}</div>
+      <q-card-section class="bg-purple-2">
+        <div class="text-h6 text-accent">{{ business.name }}</div>
+        <div class="text-subtitle2 text-accent">Location: {{ business.location }}</div>
       </q-card-section>
 
-      <q-card-section>
-        <q-input v-model="business.description" label="Description" dark :readonly="!isOwner" />
+      <q-card-section class="bg-purple-2">
+        <q-input outlined color="accent" text-color="accent" v-model="business.description" label="Description" dark :readonly="!isOwner" />
       </q-card-section>
 
-      <q-card-section>
-        <q-input v-model="business.email" label="Email" dark :readonly="!isOwner" />
+      <q-card-section class="bg-purple-2">
+        <q-input outlined color="accent" text-color="accent" v-model="business.email" label="Email" dark :readonly="!isOwner" />
       </q-card-section>
 
-      <q-card-section>
-        <q-input v-model="business.phone" label="Phone" dark :readonly="!isOwner" />
+      <q-card-section class="bg-purple-2">
+        <q-input outlined color="accent" text-color="accent" v-model="business.phone" label="Phone" dark :readonly="!isOwner" />
       </q-card-section>
 
-      <q-card-actions align="right" v-if="isOwner">
-        <q-btn label="Save" color="primary" @click="saveBusiness" />
+      <q-card-actions align="right" v-if="isOwner" class="bg-purple-3">
+        <q-btn rounded unelevated text-color="accent" color="warning" label="Save" @click="saveBusiness" />
       </q-card-actions>
     </q-card>
 
     <q-card class="q-mt-md" dark>
-      <q-card-section>
-        <div class="text-h6">Employee Management</div>
+      <q-card-section class="bg-purple-3">
+        <div class="text-h6 text-accent">Employee Management</div>
       </q-card-section>
 
       <q-separator dark />
 
-      <q-card-section>
+      <q-card-section class="bg-purple-2">
         <q-list dark>
           <q-item v-for="employee in employees" :key="employee.id" dark>
             <q-item-section>
-              <q-item-label>{{ employee.username }}</q-item-label>
-              <q-item-label caption>{{ employee.fullname }}</q-item-label>
+              <q-item-label class="text-accent">{{ employee.username }}</q-item-label>
+              <q-item-label caption class="text-accent">{{ employee.fullname }}</q-item-label>
             </q-item-section>
             <q-item-section side v-if="isOwner">
               <q-btn flat round color="negative" icon="delete" @click="deleteEmployee(employee.username)" />
@@ -50,24 +50,24 @@
         </q-list>
       </q-card-section>
 
-      <q-card-actions align="right" v-if="isOwner">
-        <q-btn label="Add Employee" color="primary" @click="showNewEmployeeDialog = true" />
+      <q-card-actions align="right" v-if="isOwner" class="bg-purple-3">
+        <q-btn rounded unelevated text-color="accent" color="positive" label="Add Employee" @click="showNewEmployeeDialog = true" />
         <NewEmployee v-model="showNewEmployeeDialog" :bid="route.params.bid" @employee-added="showNewEmployeeDialog = false" />
       </q-card-actions>
     </q-card>
 
     <q-card class="q-mt-md" dark>
-      <q-card-section>
-        <div class="text-h6">Team Management</div>
+      <q-card-section class="bg-purple-3">
+        <div class="text-h6 text-accent">Team Management</div>
       </q-card-section>
 
       <q-separator dark />
 
-      <q-card-section>
+      <q-card-section class="bg-purple-2">
         <q-list dark>
           <q-item v-for="team in teams" :key="team.id" clickable v-ripple dark @click="openTeamEditDialog(team)">
             <q-item-section>
-              <q-item-label>{{ team.name }}</q-item-label>
+              <q-item-label class="text-accent">{{ team.name }}</q-item-label>
             </q-item-section>
             <q-item-section side v-if="isOwner">
               <q-btn flat round color="negative" icon="delete" @click.stop="deleteTeam(team.id)" />
@@ -76,13 +76,13 @@
         </q-list>
       </q-card-section>
 
-      <q-card-actions align="right" v-if="isOwner">
-        <q-btn label="Add Team" color="primary" @click="showNewTeamDialog = true" />
+      <q-card-actions align="right" v-if="isOwner" class="bg-purple-3">
+        <q-btn rounded unelevated text-color="accent" color="positive" label="Add Team" @click="showNewTeamDialog = true" />
         <NewTeam v-model="showNewTeamDialog" :bid="route.params.bid" @team-created="showNewTeamDialog = false" />
       </q-card-actions>
     </q-card>
 
-    <q-dialog v-model="editDialogVisible">
+    <q-dialog v-model="editDialogVisible" backdrop-filter="blur(10px)">
       <TeamEditCard :team="selectedTeam" :bid="route.params.bid" @team-updated="editDialogVisible = false" @close-dialog="editDialogVisible = false" />
     </q-dialog>
     

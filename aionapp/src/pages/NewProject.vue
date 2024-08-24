@@ -1,24 +1,26 @@
 <template>
-  <q-page class="flex flex-center bg-dark text-white">
+  <q-page class="flex flex-center bg-primary text-accent">
     <q-stepper
+      class="bg-purple-2"
       v-model="step"
-      color="primary"
+      color="accent"
       animated
-      dark
+      
     >
       <q-step
+        color="primary"
         :name="1"
         title="Project Details"
         icon="assignment"
         :done="step > 1"
       >
-        <q-input v-model="projectName" label="Project Name" dark />
-        <q-input v-model="projectDescription" type="textarea" label="Project Description" dark />
-        <q-input v-model="startDate" type="date" label="Start Date" dark />
-        <q-input v-model="endDate" type="date" label="End Date" dark />
+        <q-input outlined color="accent" text-color="accent" v-model="projectName" label="Project Name" />
+        <q-input outlined color="accent" text-color="accent" v-model="projectDescription" type="textarea" label="Project Description" />
+        <q-input outlined color="accent" text-color="accent" v-model="startDate" type="date" label="Start Date" />
+        <q-input outlined color="accent" text-color="accent" v-model="endDate" type="date" label="End Date" />
         
         <q-stepper-navigation>
-          <q-btn @click="step = 2" color="primary" label="Next" />
+          <q-btn rounded unelevated text-color="accent" @click="step = 2" color="positive" label="Next" />
         </q-stepper-navigation>
       </q-step>
 
@@ -28,32 +30,33 @@
         icon="people"
         :done="step > 2"
       >
-        <q-input v-model="searchUser" label="Search User" @update:model-value="onSearchUser" dark>
+        <q-input outlined color="accent" text-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser" >
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-list bordered separator dark>
+        <q-list bordered separator class="bg-purple-1">
           <q-item v-for="user in filteredUsers" :key="user.id" clickable v-ripple @click="addUserToProject(user)">
             <q-item-section>
-              <q-item-label>{{ user }}</q-item-label>
+              <q-item-label class="text-accent">{{ user }}</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
 
-        <q-list bordered class="q-mt-md" dark>
-          <q-item-label header>Added Users</q-item-label>
+        <q-list bordered class="q-mt-md" >
+          <q-item-label header class="text-accent bg-purple-3">Added Users</q-item-label>
           <q-item v-for="user in addedUsers" :key="user.id">
             <q-item-section>
-              <q-item-label>{{ user.username }}</q-item-label>
+              <q-item-label class="text-accent">{{ user.username }}</q-item-label>
               <q-select
                 v-model="model"
                 :options="roleOptions"
                 label="Role"
                 dense
                 options-dense
-                dark
+                color="accent"
+                popup-content-class="bg-purple-1"
                 style="min-width: 50px;"
               />
             </q-item-section>
@@ -64,8 +67,8 @@
         </q-list>
 
         <q-stepper-navigation>
-          <q-btn flat @click="step = 1" color="primary" label="Back" class="q-mr-sm" />
-          <q-btn @click="createProject" color="primary" label="Create Project" />
+          <q-btn  outlined unelevated text-color="accent" flat @click="step = 1" color="warning" label="Back" class="q-mr-sm" />
+          <q-btn rounded unelevated text-color="accent" @click="createProject" color="positive" label="Create Project" />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
@@ -122,8 +125,8 @@ export default {
     }
 
     const addUserToProject = (username) => {
-      const currentUser = store.username; // Requester cannot be auto-added
-      if (username !== currentUser && !addedUsers.value.some(u => u === username)) {
+      const currentUser = store.username; 
+      if (username !== currentUser && !addedUsers.value.some(u => u.username === username)) {
         addedUsers.value.push({ username, role: roleOptions.value[0].value })
       }
     }

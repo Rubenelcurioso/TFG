@@ -1,75 +1,79 @@
 <template>
-  <q-dialog v-model="dialogOpen" persistent>
+  <q-dialog v-model="dialogOpen" persistent backdrop-filter="blur(10px)">
     <q-card class="bg-dark text-white">
       <q-stepper
         v-model="step"
-        color="primary"
+        color="accent"
         animated
         dark
+        class="bg-purple-2"
       >
       <q-step
+        color="primary"
         :name="1"
         title="Team Details"
         icon="people"
         :done="step > 1"
       >
-        <q-input dark v-model="teamName" label="Team Name" :rules="[
+        <q-input outlined color="accent" text-color="accent" v-model="teamName" label="Team Name" :rules="[
           val => val && val.length > 0 || 'Team name is required',
           val => val.length <= 255 || 'Team name too long'
         ]" />
-        <q-input dark v-model="teamDescription" type="textarea" label="Team Description" />
+        <q-input outlined color="accent" text-color="accent" v-model="teamDescription" type="textarea" label="Team Description" />
         
         <q-stepper-navigation>
-          <q-btn @click="step = 2" color="primary" label="Next" />
+          <q-btn rounded unelevated @click="step = 2" color="positive" text-color="accent" label="Next" />
         </q-stepper-navigation>
       </q-step>
 
       <q-step
+        color="primary"
         :name="2"
         title="Add Members"
         icon="person_add"
         :done="step > 2"
       >
-        <q-input dark v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
+        <q-input outlined color="accent" text-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-list bordered separator dark>
+        <q-list bordered separator class="bg-purple-2">
           <q-item v-for="user in filteredUsers" :key="user.id" clickable v-ripple @click="addUserToTeam(user)">
             <q-item-section>
-              <q-item-label>{{ user }}</q-item-label>
+              <q-item-label class="text-accent">{{ user }}</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
 
-        <q-list bordered class="q-mt-md" dark>
-          <q-item-label header>Added Members</q-item-label>
+        <q-list bordered class="q-mt-md bg-purple-2">
+          <q-item-label header class="text-accent bg-purple-3">Added Members</q-item-label>
           <q-item v-for="user in addedMembers" :key="user.id">
             <q-item-section>
-              <q-item-label>{{ user }}</q-item-label>
+              <q-item-label class="text-accent">{{ user }}</q-item-label>
             </q-item-section>
             <q-item-section side>
-              <q-btn flat round color="negative" icon="remove" @click="removeUserFromTeam(user)" />
+              <q-btn  flat round color="negative" icon="remove" @click="removeUserFromTeam(user)" />
             </q-item-section>
           </q-item>
         </q-list>
 
         <q-stepper-navigation>
-          <q-btn flat @click="step = 1" color="primary" label="Back" class="q-mr-sm" />
-          <q-btn @click="step = 3" color="primary" label="Next" />
+          <q-btn rounded unelevated @click="step = 1" color="warning" text-color="accent" label="Back" class="q-mr-sm" />
+          <q-btn rounded unelevated @click="step = 3" color="positive" text-color="accent" label="Next" />
         </q-stepper-navigation>
       </q-step>
 
       <q-step
+        color="primary"
         :name="3"
         title="Confirmation"
         icon="check"
         :done="step > 3"
       >
-        <q-card dark>
-          <q-card-section>
+        <q-card class="bg-purple-1">
+          <q-card-section class="text-accent">
             <div class="text-h6">Team Details</div>
             <div><strong>Name:</strong> {{ teamName }}</div>
             <div><strong>Description:</strong> {{ teamDescription }}</div>
@@ -77,13 +81,13 @@
         </q-card>
 
         <q-stepper-navigation>
-          <q-btn flat @click="step = 1" color="primary" label="Back" class="q-mr-sm" />
-          <q-btn @click="createTeam" color="primary" label="Create Team" />
+          <q-btn rounded unelevated @click="step = 1" color="warning" text-color="accent" label="Back" class="q-mr-sm" />
+          <q-btn rounded unelevated @click="createTeam" color="positive" text-color="accent" label="Create Team" />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
-    <q-card-actions align="right">
-      <q-btn flat label="Close" color="primary" v-close-popup />
+    <q-card-actions align="right" class="bg-purple-3">
+      <q-btn  rounded flat label="Close" color="negative" v-close-popup />
     </q-card-actions>
   </q-card>
   </q-dialog>
