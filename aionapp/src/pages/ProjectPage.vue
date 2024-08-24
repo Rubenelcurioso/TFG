@@ -1,11 +1,16 @@
 <template>
-  <q-page class="q-pa-md">
-    <h1>{{ projectName }}</h1>
+  <q-page class="q-pa-md bg-primary">
+    <h3 class="text-accent q-mb-sm">{{ projectName }}</h3>
+    <h5 class="courier-font q-mb-sm">{{ description }}</h5>
 
     <q-tabs
       v-model="tab"
-      class="text-teal"
-      align="left"
+      class="text-accent bg-purple-3 justify-center q-mb"
+      align="center"
+      indicator-color="info"
+      active-color="info"
+      active-bg-color="purple-2"
+      dense
     >
       <q-tab name="properties" label="Properties" />
       <q-tab name="tasks" label="Tasks" />
@@ -14,7 +19,7 @@
     </q-tabs>
 
     <q-tab-panels v-model="tab" animated>
-      <q-tab-panel name="properties">
+      <q-tab-panel name="properties" class="bg-purple-1">
         <ProjectInfo
           :pid=Number(route.params.pid)
           :description="description"
@@ -25,17 +30,17 @@
         />
       </q-tab-panel>
 
-      <q-tab-panel name="tasks">
+      <q-tab-panel name="tasks" class="bg-purple-1">
         <TaskTable />      
       </q-tab-panel>
-      <q-tab-panel name="userManagement">
+      <q-tab-panel name="userManagement" class="bg-purple-1">
         <UserProjectManagement
           :pid=Number(route.params.pid)
         />
       </q-tab-panel>
 
 
-      <q-tab-panel name="charts">
+      <q-tab-panel name="charts" class="bg-purple-1">
         <ApexCharts
           :pid=Number(route.params.pid)
         />

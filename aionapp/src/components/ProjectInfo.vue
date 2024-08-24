@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <div class="text-h6">Project properties</div>
-    <q-btn label="Edit Project" color="primary" @click="editProjectDialog" />
-    <p>Project description: {{ description }}</p>
-    <p>Created at: {{ createdAt }}</p>
-    <p>End date: {{ endDate }}</p>
-    <p>Progress: {{ progress }}</p>
-    <p>Linked business: {{ linkedBusiness }}</p>
+  <div class="bg-purple-1">
+    <div class="text-h6 text-accent">Project properties</div>
+    <p class="text-accent">Created at: {{ createdAt }}</p>
+    <p class="text-accent">End date: {{ endDate }}</p>
+    <p class="text-accent">Progress: {{ progress }} %</p>
+    <p class="text-accent">Linked business: {{ linkedBusiness }}</p>
+    <q-btn rounded outline label="Edit Project" color="info" @click="editProjectDialog" class="text-accent" style="position: absolute; bottom: 10px; right: 10px; padding: 10px; margin: 10px; color: black;" />
   </div>
 
-  <q-dialog v-model="editDialogVisible">
+  <q-dialog v-model="editDialogVisible" backdrop-filter="blur(10px)">
       <ProjectEditCard
         :projectId=project_id
         @project-updated="onProjectUpdated"

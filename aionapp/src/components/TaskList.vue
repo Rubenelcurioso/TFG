@@ -1,5 +1,5 @@
 <template>
-  <q-card class="bg-dark text-white">
+  <q-card class="bg-grey text-white">
     <q-card-section>
       <div class="text-h6">{{ title }}</div>
     </q-card-section>
@@ -10,14 +10,13 @@
       <q-table
         flat
         bordered
-        dark
         :rows="tasks"
         :columns="columns"
         row-key="id"
-        :filter="filter"
+        :filter="filter"  
       >
         <template v-slot:top-right>
-          <q-input dark dense debounce="300" v-model="filter" placeholder="Search">
+          <q-input dense debounce="300" v-model="filter" placeholder="Search">
             <template v-slot:append>
               <q-icon name="search" />
             </template>

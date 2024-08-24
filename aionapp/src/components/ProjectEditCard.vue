@@ -1,45 +1,48 @@
 <template>
-  <q-card class="project-edit-card bg-dark text-white">
-    <q-toolbar class="bg-secondary">
-      <q-toolbar-title>Edit project</q-toolbar-title>
-      <q-btn flat round dense icon="close" @click="closeDialog" color="white" />
+  <q-card class="project-edit-card bg-purple-2 text-accent">
+    <q-toolbar class="bg-purple-3">
+      <q-toolbar-title>Editar proyecto</q-toolbar-title>
+      <q-btn flat round dense icon="close" @click="closeDialog" color="negative" />
     </q-toolbar>
 
     <q-form @submit="onSubmit" class="q-gutter-md">
       <q-card-section>
-        <q-input v-model="projectName" label="Project name" :rules="projectNameRules" dark />
+        <q-input outlined color="accent" v-model="projectName" label="Nombre del proyecto" :rules="projectNameRules" class="text-accent" />
       </q-card-section>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-input v-model="startDate" label="Start date" type="date" :rules="startDateRules" dark />
+            <q-input outlined color="accent" v-model="startDate" label="Fecha de inicio" type="date" :rules="startDateRules" class="text-accent" />
           </div>
           <div class="col-6">
-            <q-input v-model="endDate" label="End date" type="date" :rules="endDateRules" dark />
+            <q-input outlined color="accent" v-model="endDate" label="Fecha de fin" type="date" :rules="endDateRules" class="text-accent" />
           </div>
         </div>
       </q-card-section>
 
       <q-card-section>
         <q-select
+          class="text-accent"
           v-model="selectedBusiness"
           :options="businesses"
-          label="Select business"
+          label="Seleccionar negocio"
           option-value="value"
           option-label="label"
           emit-value
           map-options
-          dark
+          color="accent"
+          outlined
+          popup-content-class="text-accent bg-purple-1"
         />
       </q-card-section>
 
       <q-card-section>
-        <q-input v-model="description" label="Description" type="textarea" dark />
+        <q-input outlined class="text-accent" color="accent" v-model="description" label="Descripción" type="textarea"/>
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn type="submit" color="secondary" label="Update" />
+        <q-btn rounded unelevated text-color="accent" type="submit" color="warning" label="Actualizar" />
       </q-card-actions>
     </q-form>
   </q-card>
@@ -168,12 +171,12 @@ export default {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: $purple-3;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $dark;
+  background: $purple-4;
   border-radius: 4px;
 }
 

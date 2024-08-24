@@ -1,5 +1,5 @@
 <template>
-    <q-page class="q-pa-md bg-accent">
+    <q-page class="q-pa-md bg-primary">
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
           <TaskList :team="false" title="Mis tareas" />

@@ -1,7 +1,7 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md bg-purple-1">
     <q-table    
-      flat bordered
+      bordered
       title="Tasks"
       :rows="rows"
       :columns="columns"
@@ -9,12 +9,17 @@
       :selected-rows-label="getSelectedString"
       selection="single"
       v-model:selected="selected"
+      loading="true"
     >
     
     <template v-slot:top>
-      <q-btn icon="add" color="positive" @click="showDialog" label="New task" class="q-mr-sm" :disable="userRolePerm < 7" />
-      <q-btn icon="edit" color="primary" @click="editSelectedRow" label="Edit selected" :disable="!selected.length || userRolePerm < 7" class="q-mr-sm" />
-      <q-btn icon="delete" color="negative" @click="removeSelectedRows" label="Remove selected" :disable="!selected.length || userRolePerm < 7" />
+      <div>
+        <q-btn-group rounded unelevated>
+          <q-btn outline icon="add" color="positive" @click="showDialog" label="New task" class="q-mr-sm" :disable="userRolePerm < 7" />
+          <q-btn outline icon="edit" color="warning" @click="editSelectedRow" label="Edit selected" :disable="!selected.length || userRolePerm < 7" class="q-mr-sm" />
+          <q-btn outline icon="delete" color="negative" @click="removeSelectedRows" label="Remove selected" :disable="!selected.length || userRolePerm < 7" />
+        </q-btn-group>
+      </div>
     </template>
     
     <template v-slot:body="props">
@@ -30,11 +35,11 @@
 
     </q-table>
 
-    <q-dialog v-model="dialogVisible">
+    <q-dialog v-model="dialogVisible" backdrop-filter="blur(10px)">
       <TaskCreationCard @task-created="onTaskCreate" @close-d="dialogVisible = false" />
     </q-dialog>
 
-    <q-dialog v-model="editDialogVisible">
+    <q-dialog v-model="editDialogVisible" backdrop-filter="blur(10px)">
       <TaskEditCard :taskId="selected[0].id" @task-updated="onTaskEdit" @close-dialog="editDialogVisible = false" />    
     </q-dialog>
   </div>

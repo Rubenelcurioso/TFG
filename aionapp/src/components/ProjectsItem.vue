@@ -5,17 +5,18 @@
         label="Projects"
         caption="My projects"
         default-opened
+        class="text-accent"
     >
         <q-list>
             <q-item v-for="project in projects" :key="project.id" clickable v-ripple :to="`/home/${store.uid}/project/${project.id}`">
               <q-item-section>
-                    <q-item-label>{{ project.name }}</q-item-label>
+                    <q-item-label class="text-accent">{{ project.name }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                    <q-badge color="primary" :label="`${project.progress}%`" />                
+                    <q-badge color="negative" :label="`${project.progress}%`" />                
                 </q-item-section>
                 <q-item-section side v-if="project.role_perm >= 63">
-                    <q-btn flat round color="red" icon="close" @click.stop="confirmDelete(project.id)">
+                    <q-btn flat round color="negative" icon="close" @click.stop="confirmDelete(project.id)">
                         <q-tooltip>Delete project</q-tooltip>
                     </q-btn>
                 </q-item-section>
@@ -25,9 +26,9 @@
 
         <q-item clickable v-ripple to="/new/project">
             <q-item-section avatar>
-                <q-icon name="add" color="primary" />
+                <q-icon class="text-positive" name="add" color="primary" />
             </q-item-section>
-            <q-item-section>New project</q-item-section>
+            <q-item-section class="text-positive">New project</q-item-section>
         </q-item>
 
     </q-expansion-item>

@@ -1,22 +1,22 @@
 <template>
-  <q-card class="task-edit-card primary">
-    <q-toolbar>
+  <q-card class="task-edit-card bg-purple-2">
+    <q-toolbar class="bg-purple-3">
       <q-toolbar-title>Edit task</q-toolbar-title>
-      <q-btn flat round dense icon="close" @click="closeDialog" />
+      <q-btn flat round dense icon="close" @click="closeDialog" color="negative" />
     </q-toolbar>
 
     <q-form @submit="onSubmit" class="q-gutter-md">
       <q-card-section>
-        <q-input v-model="taskName" label="Task name" :rules="taskNameRules" />
+        <q-input outlined color="accent" v-model="taskName" label="Task name" :rules="taskNameRules" />
       </q-card-section>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-input v-model="startDate" label="Start date" type="date" :rules="startDateRules" />
+            <q-input outlined color="accent" v-model="startDate" label="Start date" type="date" :rules="startDateRules" />
           </div>
           <div class="col-6">
-            <q-input v-model="endDate" label="End date" type="date" :rules="endDateRules" />
+            <q-input outlined color="accent" v-model="endDate" label="End date" type="date" :rules="endDateRules" />
           </div>
         </div>
       </q-card-section>
@@ -24,23 +24,27 @@
       <q-card-section>
         <div class="text-subtitle2">Priority</div>
         <div class="q-gutter-sm">
-          <q-radio keep-color v-model="priority" val="L" label="Low" color="light-blue" />
-          <q-radio keep-color v-model="priority" val="M" label="Medium" color="orange" />
-          <q-radio keep-color v-model="priority" val="H" label="High" color="red" />  
+          <q-radio keep-color v-model="priority" val="L" label="Low" color="light-blue" class="text-accent" />
+          <q-radio keep-color v-model="priority" val="M" label="Medium" color="orange" class="text-accent" />
+          <q-radio keep-color v-model="priority" val="H" label="High" color="red" class="text-accent" />  
         </div>
       </q-card-section> 
 
       <q-card-section>
         <div class="text-subtitle2">Status</div>
         <div class="q-gutter-sm">
-          <q-radio keep-color v-model="status" val="TODO" label="To do" color="grey" />
-          <q-radio keep-color v-model="status" val="IN_PROGRESS" label="In progress" color="blue" />
-          <q-radio keep-color v-model="status" val="DONE" label="Done" color="green" />  
+          <q-radio keep-color v-model="status" val="TODO" label="To do" color="grey" class="text-accent" />
+          <q-radio keep-color v-model="status" val="IN_PROGRESS" label="In progress" color="blue" class="text-accent" />
+          <q-radio keep-color v-model="status" val="DONE" label="Done" color="green" class="text-accent" />  
         </div>
       </q-card-section>
 
       <q-card-section>
         <q-select
+          outlined
+          color="accent"
+          text-color="accent"
+          popup-content-class="text-accent bg-purple-1"
           v-model="assignedUser"
           :options="userOptions"
           label="Assign to user"
@@ -50,6 +54,10 @@
 
       <q-card-section>
         <q-select
+          outlined
+          color="accent"
+          text-color="accent"
+          popup-content-class="text-accent bg-purple-1"
           v-model="assignedTeam"
           :options="teamOptions"
           label="Assign to Team"
@@ -57,7 +65,7 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn type="submit" color="secondary" label="Update" />
+        <q-btn rounded unelevated text-color="accent" type="submit" color="warning" label="Update" />
       </q-card-actions>
     </q-form>
   </q-card>
@@ -182,7 +190,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.task-edit-card {
+.project-edit-card {
   max-width: 500px;
   margin: 0 auto;
 }
@@ -192,12 +200,12 @@ export default {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: $purple-3;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $dark;
+  background: $purple-4;
   border-radius: 4px;
 }
 

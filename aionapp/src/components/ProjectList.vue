@@ -1,5 +1,5 @@
 <template>
-  <q-card class="bg-dark text-white">
+  <q-card class="bg-grey text-white">
     <q-card-section>
       <div class="row items-center justify-between">
         <div class="text-h6">My projects</div>
@@ -9,9 +9,9 @@
     <q-separator dark />
 
     <q-card-section>
-      <q-btn flat color="grey" class="q-mb-sm" icon="add" label="Crear proyecto" to="/new/project/" />
+      <q-btn flat color="white" class="q-mb-sm" icon="add" label="Crear proyecto" to="/new/project/" />
       
-      <q-list>
+      <q-list class="bg-white">
         <q-item v-for="project in store.projects" :key="project.id" clickable v-ripple :to="`/home/${store.uid}/project/${project.id}`">
           <q-item-section avatar>
             <q-avatar :color="project.color || 'teal'" text-color="white">
@@ -19,7 +19,7 @@
             </q-avatar>
           </q-item-section>
           <q-item-section>
-            <q-item-label>{{ project.name }}</q-item-label>
+            <q-item-label class="text-black">{{ project.name }}</q-item-label>
             <q-item-label caption>{{ project.description }}</q-item-label>
           </q-item-section>
         </q-item>

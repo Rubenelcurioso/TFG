@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h2>User Project Management</h2>
     <q-table
+      bordered
       title="Users"
       :rows="users"
       :columns="columns"
@@ -9,8 +9,10 @@
     >
       <template v-slot:top-right>
         <q-btn 
+          rounded
+          outline
           icon="add" 
-          color="positive" 
+          color="warning" 
           @click="showDialog" 
           label="Manage" 
           class="q-mr-sm" 
@@ -27,7 +29,7 @@
       </template>
     </q-table>
   </div>
-  <q-dialog v-model="dialogVisible">
+  <q-dialog v-model="dialogVisible" backdrop-filter="blur(10px)">
       <NewUserProject 
       :pid=props.pid 
       :users=users

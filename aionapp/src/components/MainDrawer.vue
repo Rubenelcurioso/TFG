@@ -3,16 +3,16 @@
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
       show-if-above
-      dark
+      class="bg-brown-3"
       content-class="bg-primary"
     >
       <q-scroll-area class="fit">
           <q-list dense padding class="menu-list">
           <q-item active clickable v-ripple :to="`/home/${store.uid}`" @click="closeDrawer">            
             <q-item-section avatar>
-              <q-icon name="home" />
+              <q-icon color="accent" name="home" />
             </q-item-section>
-            <q-item-section>Home</q-item-section>
+            <q-item-section class="text-accent">Home</q-item-section>
           </q-item>
 
           <q-separator dark spaced inset/>
@@ -25,9 +25,9 @@
 
           <q-item clickable v-ripple @click="openGithubAndCloseDrawer">
             <q-item-section avatar>
-              <q-icon name="star" />
+              <q-icon  color="accent" name="star" />
             </q-item-section>
-            <q-item-section>Rate us</q-item-section>
+            <q-item-section class="text-accent">Rate us</q-item-section>
           </q-item>
 
         </q-list>

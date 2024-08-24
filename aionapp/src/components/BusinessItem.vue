@@ -5,14 +5,15 @@
         label="Businesses"
         caption="My businesses"
         default-opened
+        class="text-accent"
     >
         <q-list>
             <q-item v-for="business in businesses" :key="business.id" clickable v-ripple :to="`/home/${store.uid}/business/${business.id}`">
               <q-item-section>
-                    <q-item-label>{{ business.name }}</q-item-label>
+                    <q-item-label class="text-accent">{{ business.name }}</q-item-label>
                 </q-item-section>
                 <q-item-section side v-if="business.owner === store.uid">
-                    <q-btn flat round color="red" icon="close" @click.stop="confirmDelete(business.id)">
+                    <q-btn flat round color="negative" icon="close" @click.stop="confirmDelete(business.id)">
                         <q-tooltip>Delete business</q-tooltip>
                     </q-btn>
                 </q-item-section>
@@ -21,9 +22,9 @@
 
         <q-item clickable v-ripple to="/new/business">
             <q-item-section avatar>
-                <q-icon name="add" color="primary" />
+                <q-icon class="text-positive" name="add" color="primary" />
             </q-item-section>
-            <q-item-section>New business</q-item-section>
+            <q-item-section class="text-positive">New business</q-item-section>
         </q-item>
 
     </q-expansion-item>

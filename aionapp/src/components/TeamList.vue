@@ -1,5 +1,5 @@
 <template>
-    <q-card class="bg-dark text-white">
+    <q-card class="bg-grey text-white">
       <q-card-section>
         <div class="row items-center justify-between">
           <div class="text-h6">Equipos de tareas</div>
@@ -10,15 +10,15 @@
   
       <q-card-section>
         
-        <q-list dark bordered separator>
+        <q-list class="bg-white" bordered separator>
           <q-item v-for="team in teams" :key="team.id" clickable v-ripple>
             <q-item-section avatar>
-              <q-avatar :color="team.color" text-color="white">
+              <q-avatar :color="team.color" text-color="dark">
                 {{ team.initials }}
               </q-avatar>
             </q-item-section>
             <q-item-section>
-              <q-item-label>{{ team.team.name }}</q-item-label>
+              <q-item-label class="text-black">{{ team.team.name }}</q-item-label>
               <q-item-label caption>Business: {{ team.business_name }}</q-item-label>
             </q-item-section>
           </q-item>
