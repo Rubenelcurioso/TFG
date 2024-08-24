@@ -8,7 +8,8 @@
     >
       <q-scroll-area class="fit">
           <q-list dense padding class="menu-list">
-          <q-item active clickable v-ripple :to="`/home/${store.uid}`" @click="closeDrawer">            <q-item-section avatar>
+          <q-item active clickable v-ripple :to="`/home/${store.uid}`" @click="closeDrawer">            
+            <q-item-section avatar>
               <q-icon name="home" />
             </q-item-section>
             <q-item-section>Home</q-item-section>

@@ -81,7 +81,7 @@ const routes = [
     },
 
     children:  [
-      { path: '', component: () => import('pages/ProjectPage.vue') }
+      { path: '', component: () => import('pages/ProjectPage.vue'), props: route => ({ key: route.params.pid }) }
     ]
   },
 
@@ -121,7 +121,7 @@ const routes = [
     },
 
     children:  [
-      { path: '', component: () => import('pages/BusinessPage.vue') }
+      { path: '', component: () => import('pages/BusinessPage.vue'), props: route => ({ key: route.params.pid }) }
     ]
   },
 

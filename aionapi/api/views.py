@@ -702,7 +702,8 @@ class UserBusiness(APIView):
             if request.user.id != user_id:
                 return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
 
-            user_businesses = Business.objects.filter(owner=user_id)
+            # Get businesses where the user is an employee
+            user_businesses = Business.objects.filter(employee__user_id=user_id).distinct()
             serializer = BusinessSerializer(user_businesses, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:

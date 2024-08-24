@@ -122,3 +122,5 @@ ignore
 
 .vscode
 .aider*
+
+.cursorignore

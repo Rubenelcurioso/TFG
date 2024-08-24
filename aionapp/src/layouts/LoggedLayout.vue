@@ -13,7 +13,7 @@
       <MainDrawer v-model="leftDrawerOpen" />
   
       <q-page-container>
-        <router-view />
+        <router-view :key="$route.params.pid || $route.params.bid || $route.fullPath" />
       </q-page-container>
     </q-layout>
   </template>
