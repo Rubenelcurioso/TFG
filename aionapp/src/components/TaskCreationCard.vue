@@ -67,11 +67,12 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { apiGet, apiPost } from '../utils/api-wrapper';
+import { useUserStore } from 'stores/user-store';
 
 export default {
   name: 'TaskCreationCard',
   emits: ['task-created', 'close-dialog'],
-  setup(props, { emit }) {
+  setup({ emit }) {
     const taskName = ref('');
     const startDate = ref('');
     const endDate = ref('');
@@ -82,6 +83,7 @@ export default {
     const route = useRoute();
     const userOptions = ref([]);
     const teamOptions = ref([]);
+    const store = useUserStore();
 
     const loadUserOptions = async () => {
       const response = await apiGet('/project/'+route.params.pid+'/users/');
@@ -89,7 +91,8 @@ export default {
     };
 
     const loadTeamOptions = async () => {
-      const response = await apiGet('/project/'+route.params.pid+'/teams/');
+      const business_id = store.projects.find(project => project.id === parseInt(route.params.pid)).business;
+      const response = await apiGet(`/business/${business_id}/teams/`);
       teamOptions.value = response.map(team => ({ label: team.name, value: team.id }));
     };
 
@@ -120,7 +123,7 @@ export default {
           end_date: endDate.value,
           priority: priority.value,
           project: route.params.pid,
-          user_assigned: assignedUser.value.value,
+          user_assigned: assignedUser.value.label,
           team_assigned: assignedTeam.value ? assignedTeam.value.value : null,
           status: status.value
         };

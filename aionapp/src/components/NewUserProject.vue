@@ -31,6 +31,7 @@
                 options-dense
                 dark
                 style="min-width: 100px;"
+                @update:model-value="updateUserRole(user)"
               />
             </q-item-section>
             <q-item-section side>
@@ -101,10 +102,10 @@ export default {
     }
 
     const addUserToProject = (user) => {
-      const currentUser = userStore.username; // Requester cannot be auto-added
+      const currentUser = userStore.username;
       if (currentUser !== user && !addedMembers.value.some(u => u.username === user)) {
-        const selectedRole = roleOptions.value.find(option => option.value === roleOptions.value[2].value);
-        addedMembers.value.push({username: user, role: selectedRole ? selectedRole.label : roleOptions.value[2].label});
+        const defaultRole = roleOptions.value[2];
+        addedMembers.value.push({username: user, role: defaultRole});
       }
     }
 
@@ -126,10 +127,17 @@ export default {
       }
     }
 
+    const updateUserRole = (user) => {
+      const updatedUser = addedMembers.value.find(u => u.username === user.username);
+      if (updatedUser) {
+        updatedUser.role = user.role.label;
+      }
+    }
+
     const onSubmit = async () => {
       for (const user of addedMembers.value) {
         if(user.role !== undefined){
-          const role_id = await roleOptions.value.find(option => option.label === user.role);
+          const role_id = roleOptions.value.find(option => option.label === user.role);
           if(role_id !== undefined){
             try {
               const userData = {
@@ -154,11 +162,11 @@ export default {
     }
 
     const updateAddedMembers = () => {
-    addedMembers.value = props.users.map(user => ({
-      ...user,
-      role: roleOptions.value.find(role => role.value === user.role)?.label || ''
-    }));
-  }
+      addedMembers.value = props.users.map(user => ({
+        ...user,
+        role: roleOptions.value.find(role => role.value === user.role) || roleOptions.value[2]
+      }));
+    }
 
     onMounted(() => {
       updateAddedMembers();
@@ -172,6 +180,7 @@ export default {
       onSearchUser,
       addUserToProject,
       removeUserFromProject,
+      updateUserRole,
       onSubmit,
       closeDialog,
       model,

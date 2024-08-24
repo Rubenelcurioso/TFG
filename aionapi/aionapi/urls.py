@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
-from api.views import  UserBusiness, UserDetail, ProjectUsers, UsernameSearch, UserProjects, UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
+from api.views import  UserTeams, UserBusiness, UserDetail, ProjectUsers, UsernameSearch, UserProjects, UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
 urlpatterns = [
     path('register/', UserRegistration.as_view(), name='register'), # Sign up session
     path('login/', UserLogin.as_view(), name='login'), # Log in session
@@ -40,11 +40,12 @@ urlpatterns = [
     path('user/<int:user_id>/businesses/', UserBusiness.as_view(), name='user-projects'), # Businesses of user
     path('user/<int:user>/', UserDetail.as_view(), name='username-search'), # Search for username given ID
     path('user/<int:user_id>/tasks/', TaskList.as_view(), name='user-tasks'), # User tasks
+    path('user/<int:user_id>/team/tasks/', TaskList.as_view(), name='team-tasks'), # Get team tasks of the given user
+    path('user/<int:user_id>/team/', UserTeams.as_view(), name='user-team'), # Get teams of the given user
     path('username/<str:username>/', UsernameSearch.as_view(), name='username-search'), # Search for username
     path('employees/username/<int:business_id>/<str:username>/', UsernameSearch.as_view(), name='employee-username-search'), # Search for username by employees
     path('project/<int:project_id>/', ProjectList.as_view(), name='project'), # Project data
     path('project/<int:project_id>/users/', ProjectUsers.as_view(), name='project-users'), # Users of a project
-    path('project/<int:project_id>/teams/', TeamList.as_view(), name='project-teams'), # Teams of a project
     path('project/<int:project_id>/tasks/', TaskList.as_view(), name='project-tasks'), # Tasks of a project
     path('project/update/', ProjectList.as_view(), name='update-project'), # Update project
     path('remove/project/<int:project_id>/', ProjectList.as_view(), name='remove-project'), # Remove project

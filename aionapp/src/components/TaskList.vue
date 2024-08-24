@@ -38,7 +38,7 @@
 
 <script>
 import { defineComponent, onMounted, ref } from 'vue';
-import { apiGet} from '../utils/api-wrapper'
+import { apiGet } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
 import { date } from 'quasar'
 
@@ -49,8 +49,12 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    team: {
+      type: Boolean,
+      required: true,
+    },
   },
-  setup() {
+  setup(props) {
     const store = useUserStore();
     const filter = ref('');
     const columns = [
@@ -72,7 +76,12 @@ export default defineComponent({
 
     const fetchTasks = async () => {
           try {
-            const response = await apiGet(`/user/${store.uid}/tasks`);            
+            let response;
+            if(!props.team)
+              response = await apiGet(`/user/${store.uid}/tasks/`);
+            else
+              response = await apiGet(`/user/${store.uid}/team/tasks/`);
+                       
             tasks.value = response;
           } catch (error) {
             console.error('Error fetching tasks:', error);

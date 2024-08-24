@@ -12,9 +12,9 @@
     >
     
     <template v-slot:top>
-      <q-btn icon="add" color="positive" @click="showDialog" label="New task" class="q-mr-sm" />
-      <q-btn icon="edit" color="primary" @click="editSelectedRow" label="Edit selected" :disable="!selected.length" class="q-mr-sm" />
-      <q-btn icon="delete" color="negative" @click="removeSelectedRows" label="Remove selected" :disable="!selected.length" />
+      <q-btn icon="add" color="positive" @click="showDialog" label="New task" class="q-mr-sm" :disable="userRolePerm < 7" />
+      <q-btn icon="edit" color="primary" @click="editSelectedRow" label="Edit selected" :disable="!selected.length || userRolePerm < 7" class="q-mr-sm" />
+      <q-btn icon="delete" color="negative" @click="removeSelectedRows" label="Remove selected" :disable="!selected.length || userRolePerm < 7" />
     </template>
     
     <template v-slot:body="props">
@@ -46,6 +46,7 @@ import TaskCreationCard from 'components/TaskCreationCard.vue'
 import TaskEditCard from 'components/TaskEditCard.vue'
 import { apiGet, apiDelete, apiPut } from '../utils/api-wrapper'
 import { useRoute } from 'vue-router'
+import { useUserStore } from 'stores/user-store'
 
 const columns = [
         {
@@ -76,6 +77,8 @@ export default defineComponent({
     const dialogVisible = ref(false)
     const editDialogVisible = ref(false)
     const rows = ref([])
+    const store = useUserStore()
+    const userRolePerm = ref(store.projects.find(project => project.id === parseInt(route.params.pid)).role_perm)
 
     const getSelectedString = () => {
       return selected.value.length === 0 ? '' : `${selected.value.length} record${selected.value.length > 1 ? 's' : ''} selected of ${rows.value.length}`
@@ -139,6 +142,7 @@ export default defineComponent({
       editSelectedRow,
       onTaskEdit,
       onTaskCreate,
+      userRolePerm,
     }
   }
 });

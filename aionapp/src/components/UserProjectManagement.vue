@@ -8,7 +8,14 @@
       row-key="id"
     >
       <template v-slot:top-right>
-        <q-btn icon="add" color="positive" @click="showDialog" label="Manage" class="q-mr-sm" />
+        <q-btn 
+          icon="add" 
+          color="positive" 
+          @click="showDialog" 
+          label="Manage" 
+          class="q-mr-sm" 
+          :disable="userRolePerm < 7"
+        />
       </template>
 
       <template v-slot:body-cell-Avatar="props">
@@ -48,6 +55,9 @@ export default {
   },
   setup(props){
     const dialogVisible = ref(false);
+    const userStore = useUserStore();
+    const users = ref([]);
+    const userRolePerm = ref(userStore.projects.find(project => project.id === parseInt(props.pid)).role_perm)
 
     const showDialog = () => {
       dialogVisible.value = true;
@@ -57,9 +67,6 @@ export default {
       dialogVisible.value = false;
       fetchUserProject();
     };
-
-    const userStore = useUserStore();
-    const users = ref([]);
 
     const columns = [
       { name: 'Avatar', field: 'avatar', label: 'Avatar', align: 'left' },
@@ -84,7 +91,9 @@ export default {
       dialogVisible,
       showDialog,
       onUserMod,
-      props
+      props,
+      userStore,
+      userRolePerm
     };
   }
 }

@@ -65,8 +65,9 @@
 
 <script>
 import { ref, onMounted, inject } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { apiGet, apiPut } from '../utils/api-wrapper';
+import { useUserStore } from 'stores/user-store';
 
 export default {
   name: 'TaskEditCard',
@@ -85,10 +86,10 @@ export default {
     const assignedUser = ref(null);
     const assignedTeam = ref(null);
     const route = useRoute();
-    const router = useRouter();
     const userOptions = ref([]);
     const teamOptions = ref([]);
     const refresh = inject('refresh');
+    const store = useUserStore();
 
     const loadTaskData = async () => {
       try {
@@ -111,14 +112,15 @@ export default {
     };
 
     const loadTeamOptions = async () => {
-      const response = await apiGet('/project/'+route.params.pid+'/teams/');
+      const business_id = store.projects.find(project => project.id === parseInt(route.params.pid)).business;
+      const response = await apiGet(`/business/${business_id}/teams/`);
       teamOptions.value = response.map(team => ({ label: team.name, value: team.id }));
     };
 
     onMounted(() => {
       loadTaskData();
       loadUserOptions();
-      //loadTeamOptions();
+      loadTeamOptions();
     });
 
     const taskNameRules = [

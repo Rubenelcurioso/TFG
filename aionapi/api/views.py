@@ -407,7 +407,7 @@ class TaskList(APIView):
             return Response({'error': 'You do not have access to this task'}, status=status.HTTP_403_FORBIDDEN)
 
         # Check if the user role has sufficient permissions
-        if user_project_role.role.name == 'Guest' or user_project_role.role.perm < 5:
+        if user_project_role.role.name == 'Guest' or user_project_role.role.perm < 7:
             return Response({'error': 'You do not have sufficient permissions to edit this task'}, status=status.HTTP_403_FORBIDDEN)
 
         print(request.data)
@@ -486,8 +486,14 @@ class TaskList(APIView):
             return Response(task_data)
         
         elif user_id:
-            # Get tasks for the user making the request, excluding tasks with status DONE
-            tasks = Task.objects.filter(user_assigned=request.user).exclude(status='DONE').select_related('user_assigned', 'team_assigned', 'project')
+            if '/team/' in request.path:
+                # Get tasks for the user's team, excluding tasks with status DONE
+                user = User.objects.get(id=user_id)
+                user_teams = Team.objects.filter(employee__user=user)
+                tasks = Task.objects.filter(team_assigned__in=user_teams).exclude(status='DONE').select_related('user_assigned', 'team_assigned', 'project')
+            else:
+                # Get tasks for the user making the request, excluding tasks with status DONE
+                tasks = Task.objects.filter(user_assigned=request.user).exclude(status='DONE').select_related('user_assigned', 'team_assigned', 'project')
             
             task_data = []
             for task in tasks:
@@ -495,7 +501,7 @@ class TaskList(APIView):
                     'id': task.id,
                     'name': task.name,
                     'description': task.description,
-                    'user': task.user_assigned.username,
+                    'user': task.user_assigned.username if task.user_assigned else None,
                     'priority': task.get_priority_display(),
                     'start_date': task.start_date,
                     'end_date': task.end_date,
@@ -504,16 +510,23 @@ class TaskList(APIView):
                     'project': task.project.name
                 }
                 task_data.append(task_info)
-            
-            return Response(task_data)
-        
+            return Response(task_data)        
     def post(self, request):
         # Check if the user has sufficient permissions
         user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=request.data.get('project')).first()
         if not user_project_role or user_project_role.role.perm < 7:
             return Response({'error': 'You do not have sufficient permissions to create a task'}, status=status.HTTP_403_FORBIDDEN)
 
-        serializer = TaskSerializer(data=request.data)
+        # Get the User instance based on the provided username
+        user_assigned = User.objects.filter(username=request.data.get('user_assigned')).first()
+        if not user_assigned:
+            return Response({'error': 'Invalid username provided for user_assigned'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the request data with the User instance
+        request_data = request.data.copy()
+        request_data['user_assigned'] = user_assigned.id
+
+        serializer = TaskSerializer(data=request_data)
         if serializer.is_valid():
             task = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -691,6 +704,38 @@ class UserBusiness(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserTeams(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            # Check if the JWT token owner is the same as the user_id provided in the URL
+            if request.user.id != user_id:
+                return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+
+            # Check if the user is an employee of any business
+            employee_businesses = Employee.objects.filter(user_id=user_id)
+            is_employee = employee_businesses.exists()
+            
+            if not is_employee:
+                return Response({'error': 'User is not an employee of any business'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if is_employee:
+                user_teams = Team.objects.filter(employee__in=employee_businesses).distinct()
+                team_data = []
+                for team in user_teams:
+                    business = team.business
+                    team_data.append({
+                        'team': TeamSerializer(team).data,
+                        'business_name': business.name if business else None
+                    })
+            
+            return Response(team_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UsernameSearch(APIView):
     authentication_classes = [JWTAuthentication]
