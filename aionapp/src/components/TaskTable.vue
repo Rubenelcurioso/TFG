@@ -31,7 +31,7 @@
     </q-table>
 
     <q-dialog v-model="dialogVisible">
-      <TaskCreationCard @task-created="onTaskCreate" @close-dialog="dialogVisible = false" />
+      <TaskCreationCard @task-created="onTaskCreate" @close-d="dialogVisible = false" />
     </q-dialog>
 
     <q-dialog v-model="editDialogVisible">

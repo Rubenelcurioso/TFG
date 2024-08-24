@@ -14,7 +14,7 @@
           @click="showDialog" 
           label="Manage" 
           class="q-mr-sm" 
-          :disable="userRolePerm < 7"
+          :disable="userRolePerm < 31"
         />
       </template>
 

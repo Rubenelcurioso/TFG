@@ -83,7 +83,7 @@
     </q-card>
 
     <q-dialog v-model="editDialogVisible">
-      <TeamEditCard :team="selectedTeam" :bid="route.params.bid" @close="editDialogVisible = false" />
+      <TeamEditCard :team="selectedTeam" :bid="route.params.bid" @team-updated="editDialogVisible = false" @close-dialog="editDialogVisible = false" />
     </q-dialog>
     
   </q-page>
@@ -117,7 +117,7 @@ export default {
     const selectedTeam = ref(null)
 
     const isOwner = computed(() => {
-      return store.projects.some(project => project.id === route.params.bid && project.owner === store.uid)
+      return store.businesses.some(business => business.id == route.params.bid && business.owner === store.uid)
     })
 
     const fetchBusiness = async () => {

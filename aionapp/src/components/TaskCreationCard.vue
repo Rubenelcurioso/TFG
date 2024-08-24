@@ -71,8 +71,7 @@ import { useUserStore } from 'stores/user-store';
 
 export default {
   name: 'TaskCreationCard',
-  emits: ['task-created', 'close-dialog'],
-  setup({ emit }) {
+  setup(props, { emit }) {
     const taskName = ref('');
     const startDate = ref('');
     const endDate = ref('');
@@ -92,6 +91,7 @@ export default {
 
     const loadTeamOptions = async () => {
       const business_id = store.projects.find(project => project.id === parseInt(route.params.pid)).business;
+      if(!business_id) return;
       const response = await apiGet(`/business/${business_id}/teams/`);
       teamOptions.value = response.map(team => ({ label: team.name, value: team.id }));
     };
@@ -129,14 +129,13 @@ export default {
         };
         await apiPost('/new/task/', taskData);
         emit('task-created');
-        closeDialog();
       } catch (error) {
         console.error('Error creating task:', error);
       }
     };
 
     const closeDialog = () => {
-      emit('close-dialog');
+      emit('close-d');
     };
 
     return {
