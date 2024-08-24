@@ -10,6 +10,7 @@
       <q-tab name="properties" label="Properties" />
       <q-tab name="tasks" label="Tasks" />
       <q-tab name="userManagement" label="User Management" />
+      <q-tab name="charts" label="Charts" />
     </q-tabs>
 
     <q-tab-panels v-model="tab" animated>
@@ -32,6 +33,13 @@
           :pid=Number(route.params.pid)
         />
       </q-tab-panel>
+
+
+      <q-tab-panel name="charts">
+        <ApexCharts
+          :pid=Number(route.params.pid)
+        />
+      </q-tab-panel>
     </q-tab-panels>
 
   </q-page>
@@ -43,6 +51,7 @@ import { useRoute } from 'vue-router';
 import TaskTable from 'components/TaskTable.vue';
 import ProjectInfo from 'components/ProjectInfo.vue';
 import UserProjectManagement from 'components/UserProjectManagement.vue';
+import ApexCharts from 'components/ApexCharts.vue';
 import { apiGet } from '../utils/api-wrapper';
 import { useUserStore } from 'stores/user-store';
 
@@ -51,7 +60,8 @@ export default defineComponent({
   components: {
     TaskTable,
     ProjectInfo,
-    UserProjectManagement
+    UserProjectManagement,
+    ApexCharts
   },
   setup() {
     const route = useRoute();

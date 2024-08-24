@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from datetime import datetime
+from django.db.models import Count
 
 
 class UserRegistration(APIView):
@@ -384,7 +385,59 @@ class ProjectList(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    
+class Stats(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        if not project_id:
+            return Response({'error': 'project_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the user has access to the project
+        user_project_role = UserProjectRole.objects.filter(user=request.user, project_id=project_id).first()
+        if not user_project_role:
+            return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Retrieve stats for the project
+        total_tasks = Task.objects.filter(project_id=project_id).count()
+        completed_tasks = Task.objects.filter(project_id=project_id, status='completed').count()
+        pending_tasks = Task.objects.filter(project_id=project_id, status='pending').count()
+
+        # If the request URL contains '/priority/', filter tasks by priority
+        if '/priority/' in request.path:
+            priority_counts = Task.objects.filter(project_id=project_id).values('priority').annotate(count=Count('id'))
+            counted_priorities = {
+                'H': sum(item['count'] for item in priority_counts if item['priority'] == 'H'),
+                'M': sum(item['count'] for item in priority_counts if item['priority'] == 'M'),
+                'L': sum(item['count'] for item in priority_counts if item['priority'] == 'L') 
+            }
+            return Response({'priority_counts': counted_priorities}, status=status.HTTP_200_OK)
+        elif '/status/' in request.path:
+            status_counts = Task.objects.filter(project_id=project_id).values('status').annotate(count=Count('id'))
+            counted_statuses = {
+                'DONE': sum(item['count'] for item in status_counts if item['status'] == 'DONE'),
+                'IN_PROGRESS': sum(item['count'] for item in status_counts if item['status'] == 'IN_PROGRESS'),
+                'TODO': sum(item['count'] for item in status_counts if item['status'] == 'TODO')
+            }
+            return Response({'status_counts': counted_statuses}, status=status.HTTP_200_OK)
+        elif '/workload/' in request.path:
+            workload_counts = Task.objects.filter(project_id=project_id).values('user_assigned').annotate(count=Count('id'))
+            counted_workloads = {}
+            for user in workload_counts:
+                username = User.objects.filter(id=user['user_assigned']).values_list('username', flat=True).first()
+                if username:
+                    counted_workloads[username] = user['count']
+            return Response({'workload_counts': counted_workloads}, status=status.HTTP_200_OK)
+        else:
+            done_tasks_count = Task.objects.filter(project_id=project_id, status='DONE').count()
+            return Response({
+                'total_tasks': total_tasks,
+                'completed_tasks': completed_tasks,
+                'pending_tasks': pending_tasks,
+                'done_tasks_count': done_tasks_count,
+            }, status=status.HTTP_200_OK)
+
+
 class RoleList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -413,7 +466,13 @@ class TaskList(APIView):
         if user_project_role.role.name == 'Guest' or user_project_role.role.perm < 7:
             return Response({'error': 'You do not have sufficient permissions to edit this task'}, status=status.HTTP_403_FORBIDDEN)
 
-        print(request.data)
+        if 'user_assigned' in request.data:
+            username = request.data['user_assigned']
+            user = User.objects.filter(username=username).first()
+            if user:
+                request.data['user_assigned'] = user.id
+            else:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = TaskSerializer(task, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

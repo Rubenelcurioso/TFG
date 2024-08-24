@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
-from api.views import  UserTeams, UserBusiness, UserDetail, ProjectUsers, UsernameSearch, UserProjects, UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
+from api.views import  Stats, UserTeams, UserBusiness, UserDetail, ProjectUsers, UsernameSearch, UserProjects, UserLogout, UserRegistration, UserLogin, BusinessList, TeamList, EmployeeList, ProjectList, RoleList, TaskList, UserProjectRoleList
 urlpatterns = [
     path('register/', UserRegistration.as_view(), name='register'), # Sign up session
     path('login/', UserLogin.as_view(), name='login'), # Log in session
@@ -58,4 +58,8 @@ urlpatterns = [
     path('roles/', RoleList.as_view(), name='role-list'), # Get roles
     path('userprojectrole/update/', UserProjectRoleList.as_view(), name='userprojectrole-update'), # Update UserProjectRole
     path('userprojectrole/', UserProjectRoleList.as_view(), name='userprojectrole-list'), # Create UserProjectRole
+    path('stats/<int:project_id>/priority/', Stats.as_view(), name='priority-stats'), # Priority stats
+    path('stats/<int:project_id>/status/', Stats.as_view(), name='status-stats'), # Status stats
+    path('stats/<int:project_id>/workload/', Stats.as_view(), name='workload-stats'), # Workload stats
+    path('stats/<int:project_id>/progress/', Stats.as_view(), name='progress-stats'), # Progress stats
 ]

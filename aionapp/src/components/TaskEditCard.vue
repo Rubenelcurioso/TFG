@@ -43,7 +43,7 @@
         <q-select
           v-model="assignedUser"
           :options="userOptions"
-          label="Assign to User"
+          label="Assign to user"
           :rules="[val => !!val || 'Please assign the task to a user']"
         />
       </q-card-section>
@@ -145,7 +145,7 @@ export default {
           end_date: endDate.value,
           priority: priority.value,
           project: route.params.pid,
-          user_assigned: assignedUser.value.value,
+          user_assigned: assignedUser.value.label,
           team_assigned: assignedTeam.value ? assignedTeam.value.value : null,
           status: status.value
         };
