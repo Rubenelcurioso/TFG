@@ -2,10 +2,10 @@
     <q-page class="q-pa-md bg-primary">
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
-          <TaskList :team="false" title="Mis tareas" />
+          <TaskList :team="false" title="My tasks" />
         </div>
         <div class="col-12 col-md-6">
-          <TaskList :team="true" title="Tareas de equipo" />
+          <TaskList :team="true" title="Team tasks" />
         </div>
       </div>
       
@@ -25,13 +25,13 @@
   import TaskList from 'components/TaskList.vue';
   import ProjectList from 'components/ProjectList.vue';
   import TeamList from 'components/TeamList.vue';
-  
+
   export default defineComponent({
     name: 'HomeUser',
     components: {
       TaskList,
       ProjectList,
-      TeamList,
+      TeamList
     },
     setup() {
       return {

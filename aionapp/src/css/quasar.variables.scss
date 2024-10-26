@@ -14,22 +14,27 @@
 
 $primary   : #FAF0E6;
 $secondary : #A57F60;
-$third     : #e0d9d1;
-$accent    : #1A090D;
-$tertiary    : #c4a789;
+$accent    : #4A3831;
+$third     : #E8D0B3;
+$tertiary    : #DEB887;
 
 $dark      : #A57F60;
-$dark-page : #0C1618;
+$dark-page : #2C1810;
 
-$positive  : #12aa72;
-$negative  : #CA054D;
-$info      : #4E598C;
-$warning   : #F2769D;
+$positive  : #66754b;
+$negative  : #C45D4E;
+$info      : #7B8FA3;
+$warning   : #E9A178;
 
-$low       : #add8e6;
-$medium    : #ffa500;
-$high      : #c62828;
+$low-priority      : #add8e6;
+$medium-priority   : #ffa500;
+$high-priority     : #c62828;
 
 $todo      : #c8e6c9;
 $inprogress: #add8e6;
 $done      : #4caf50;
+
+$generic-border-radius: 12px;
+$table-hover-background: rgb(250,240,230, 0.3);
+$table-dark-hover-background : rgb(42, 42, 42, 0.3);
+$separator-color: $third;

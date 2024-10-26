@@ -1,18 +1,21 @@
 <template>
   <div>
+    <div class="text-h6 text-accent">Users</div>
+    <q-separator color="#FF0000" inset size="2px"/>
     <q-table
-      bordered
-      title="Users"
+      flat
+      table-class="text-accent"
+      table-header-class="bg-dark text-white"
+      title=""
       :rows="users"
       :columns="columns"
       row-key="id"
     >
       <template v-slot:top-right>
         <q-btn 
-          rounded
-          outline
-          icon="add" 
-          color="warning" 
+          push
+          icon="settings" 
+          color="info" 
           @click="showDialog" 
           label="Manage" 
           class="q-mr-sm" 

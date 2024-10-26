@@ -1,11 +1,16 @@
 <template>
-  <div class="bg-purple-1">
+  <div class="bg-white">
     <div class="text-h6 text-accent">Project properties</div>
-    <p class="text-accent">Created at: {{ createdAt }}</p>
-    <p class="text-accent">End date: {{ endDate }}</p>
-    <p class="text-accent">Progress: {{ progress }} %</p>
-    <p class="text-accent">Linked business: {{ linkedBusiness }}</p>
-    <q-btn rounded outline label="Edit Project" color="info" @click="editProjectDialog" class="text-accent" style="position: absolute; bottom: 10px; right: 10px; padding: 10px; margin: 10px; color: black;" />
+    <q-separator color="#FF0000" inset size="2px"/>
+    <p class="text-accent q-mt-md q-mb-none sans-serif">Created at</p>
+    <q-input standout v-model="creationDate" label="" class="text-accent bg-primary" readonly/>
+    <p class="text-accent q-mt-sm q-mb-none sans-serif">End date</p>
+    <q-input standout v-model="endingDate" label=" " class="text-accent bg-primary" readonly/>
+    <p class="text-accent q-mt-sm q-mb-none sans-serif">Progress: {{ progression }}%</p>
+    <q-linear-progress :value="progression/100" size="20px" rounded color="info" class="q-mt-sm q-mb-sm" />
+    <p class="text-accent q-mt-sm q-mb-none sans-serif">Business</p>
+    <q-input standout v-model="businessName" label=" " class="text-accent bg-primary generic-border-radius" readonly/>
+    <q-btn push label="Edit Project" color="dark" @click="editProjectDialog" class="text-accent q-mt-md" />
   </div>
 
   <q-dialog v-model="editDialogVisible" backdrop-filter="blur(10px)">
@@ -18,7 +23,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { useUserStore } from 'stores/user-store';
 import ProjectEditCard from 'components/ProjectEditCard.vue';
 
@@ -27,8 +32,8 @@ export default defineComponent({
   props: {
     pid: Number,
     description: String,
-    createdAt: Date,
-    endDate: Date,
+    createdAt: String,
+    endDate: String,
     progress: Number,
     linkedBusiness: String
   },
@@ -37,11 +42,11 @@ export default defineComponent({
   },
   setup(props){
     const project_id = props.pid;
-    const description = props.description;
-    const createdAt = props.createdAt;
-    const endDate = props.endDate;
-    const progress = props.progress;
-    const linkedBusiness = props.business;
+    const description = ref(props.description);
+    const creationDate = ref(props.createdAt);
+    const endingDate = ref(props.endDate);
+    const progression = ref(props.progress);
+    const businessName = ref(props.business);
     const editDialogVisible = ref(false);
     const store = useUserStore();
 
@@ -55,8 +60,31 @@ export default defineComponent({
       editDialogVisible.value = false;
     }
 
+    watch(() => props.description, (newVal) => {
+      description.value = newVal;
+    });
+
+    watch(() => props.createdAt, (newVal) => {
+      creationDate.value = newVal;
+    });
+
+    watch(() => props.endDate, (newVal) => {
+      endingDate.value = newVal;
+    });
+
+    watch(() => props.progress, (newVal) => {
+      progression.value = newVal;
+    });
+
+    watch(() => props.linkedBusiness, (newVal) => {
+      businessName.value = newVal;
+    });
 
     return{
+      creationDate,
+      endingDate,
+      progression,
+      businessName,
       editDialogVisible,
       editProjectDialog,
       onProjectUpdated,

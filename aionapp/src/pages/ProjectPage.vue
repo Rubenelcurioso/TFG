@@ -1,52 +1,60 @@
 <template>
   <q-page class="q-pa-md bg-primary">
-    <h3 class="text-accent q-mb-sm">{{ projectName }}</h3>
-    <h5 class="courier-font q-mb-sm">{{ description }}</h5>
+    <q-card class="bg-white text-accent generic-border-radius">
+      <q-card-section>
+        <div class="text-center">
+          <h3 class="text-accent q-mb-sm">{{ projectName }}</h3>     
+          <h5 class="courier-font q-mb-sm">{{ description }}</h5>
+        </div>
+      </q-card-section>
 
-    <q-tabs
-      v-model="tab"
-      class="text-accent bg-purple-3 justify-center q-mb"
-      align="center"
-      indicator-color="info"
-      active-color="info"
-      active-bg-color="purple-2"
-      dense
-    >
-      <q-tab name="properties" label="Properties" />
-      <q-tab name="tasks" label="Tasks" />
-      <q-tab name="userManagement" label="User Management" />
-      <q-tab name="charts" label="Charts" />
-    </q-tabs>
+      <q-separator color="#FF0000" inset size="2px"/>
 
-    <q-tab-panels v-model="tab" animated>
-      <q-tab-panel name="properties" class="bg-purple-1">
-        <ProjectInfo
-          :pid=Number(route.params.pid)
-          :description="description"
-          :createdAt=createdAt
-          :endDate=endDate
-          :progress="progress"
-          :linkedBusiness="linkedBusiness"
-        />
-      </q-tab-panel>
+      <q-card-section>
+      <q-tabs
+        v-model="tab"
+        class="text-white bg-dark justify-center q-mb"
+        align="center"
+        indicator-color="dark"
+        active-color="accent"
+        active-bg-color="white"
+      >
+        <q-tab name="properties" label="Properties" />
+        <q-tab name="tasks" label="Tasks" />
+        <q-tab name="userManagement" label="User Management" />
+        <q-tab name="charts" label="Charts" />
+      </q-tabs>
 
-      <q-tab-panel name="tasks" class="bg-purple-1">
-        <TaskTable />      
-      </q-tab-panel>
-      <q-tab-panel name="userManagement" class="bg-purple-1">
-        <UserProjectManagement
-          :pid=Number(route.params.pid)
-        />
-      </q-tab-panel>
+      <q-tab-panels v-model="tab" animated>
+        <q-tab-panel name="properties" class="bg-white">
+          <ProjectInfo
+            :pid=Number(route.params.pid)
+            :description="description"
+            :createdAt=createdAt
+            :endDate=endDate
+            :progress="progress"
+            :linkedBusiness="linkedBusiness"
+          />
+        </q-tab-panel>
+
+        <q-tab-panel name="tasks" class="bg-white">
+          <TaskTable />      
+        </q-tab-panel>
+        <q-tab-panel name="userManagement" class="bg-white">
+          <UserProjectManagement
+            :pid=Number(route.params.pid)
+          />
+        </q-tab-panel>
 
 
-      <q-tab-panel name="charts" class="bg-purple-1">
-        <ApexCharts
-          :pid=Number(route.params.pid)
-        />
-      </q-tab-panel>
-    </q-tab-panels>
-
+        <q-tab-panel name="charts" class="bg-white">
+          <ApexCharts
+            :pid=Number(route.params.pid)
+          />
+        </q-tab-panel>
+      </q-tab-panels>
+    </q-card-section>
+  </q-card>
   </q-page>
 </template>
 
@@ -90,7 +98,9 @@ export default defineComponent({
       linkedBusiness.value = response.business_name;
     }
 
-    onMounted(fetchProjectData);
+    onMounted(() => {
+      fetchProjectData();
+    });
 
     return {
       tab,

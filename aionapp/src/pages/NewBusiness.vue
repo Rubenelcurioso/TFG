@@ -4,49 +4,49 @@
       v-model="step"
       color="accent"
       animated
-      class="bg-purple-2"
+      class="bg-white"
     >
       <q-step
-        color="primary"
+        color="dark"
         :name="1"
         title="Business details"
         icon="business"
         :done="step > 1"
       >
-        <q-input outlined color="accent" text-color="accent" v-model="businessName" label="Business name" :rules="[
+        <q-input standout="bg-primary text-accent q-ma-md" outlined bg-color="primary" color="accent" text-color="accent" v-model="businessName" label="Business name" :rules="[
           val => val && val.length > 0 || 'Company name is required',
           val => val.length <= 255 || 'Company name too long'
         ]" />
-        <q-input outlined color="accent" text-color="accent" v-model="businessDescription" type="textarea" label="Business description" />
-        <q-input outlined color="accent" text-color="accent" v-model="businessEmail" type="email" label="Business email" :rules="[
+        <q-input standout="bg-primary text-accent q-ma-md" outlined bg-color="primary" color="accent" text-color="accent" v-model="businessDescription" type="textarea" label="Business description" />
+        <q-input standout="bg-primary text-accent q-ma-md" outlined bg-color="primary" color="accent" text-color="accent" v-model="businessEmail" type="email" label="Business email" :rules="[
           val => val && val.length > 0 || 'Email is required',
           val => val.length <= 150 || 'Email too long',
           val => /^\S+@\S+\.\S+$/.test(val) || 'Email is not valid'
         ]" />
-        <q-input outlined color="accent" text-color="accent" v-model="businessLocation" label="Business location" />
-        <q-input outlined color="accent" text-color="accent" v-model="businessPhone" label="Business phone" :rules="[
+        <q-input standout="bg-primary text-accent q-ma-md" outlined bg-color="primary" color="accent" text-color="accent" v-model="businessLocation" label="Business location" />
+        <q-input standout="bg-primary text-accent q-ma-md" outlined bg-color="primary" color="accent" text-color="accent" v-model="businessPhone" label="Business phone" :rules="[
           val => !val || val.length <= 20 || 'Phone number too long'
         ]" />
         
         <q-stepper-navigation>
-          <q-btn rounded unelevated text-color="accent" @click="step = 2" color="positive" label="Next" />
+          <q-btn push text-color="white" @click="step = 2" color="positive" label="Next" />
         </q-stepper-navigation>
       </q-step>
 
       <q-step
-        color="primary"
+        color="dark"
         :name="2"
         title="Add Employees"
         icon="people"
         :done="step > 2"
       >
-        <q-input outlined color="accent" text-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
+        <q-input standout="bg-primary text-accent" outlined bg-color="primary" color="accent" text-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-list bordered separator class="bg-purple-1">
+        <q-list bordered separator class="bg-primary">
           <q-item v-for="user in filteredUsers" :key="user.id" clickable v-ripple @click="addUserToEmployees(user)">
             <q-item-section>
               <q-item-label class="text-accent">{{ user }}</q-item-label>
@@ -55,8 +55,8 @@
         </q-list>
 
         <q-list bordered class="q-mt-md" >
-          <q-item-label header class="text-accent bg-purple-3">Added Employees</q-item-label>
-          <q-item v-for="user in addedEmployees" :key="user.id">
+          <q-item-label header class="text-accent bg-dark">Added Employees</q-item-label>
+          <q-item v-for="user in addedEmployees" :key="user.id" class="bg-primary">
             <q-item-section>
               <q-item-label class="text-accent">{{ user }}</q-item-label>
             </q-item-section>
@@ -67,19 +67,19 @@
         </q-list>
 
         <q-stepper-navigation>
-          <q-btn  rounded unelevated text-color="accent" flat @click="step = 1" color="warning" label="Back" class="q-mr-sm" />
-          <q-btn rounded unelevated text-color="accent" @click="step = 3" color="positive" label="Next" />
+          <q-btn  push text-color="white" @click="step = 1" color="negative" label="Back" class="q-mr-sm" />
+          <q-btn push text-color="white" @click="step = 3" color="positive" label="Next" />
         </q-stepper-navigation>
       </q-step>
 
       <q-step
-        color="primary"
+        color="dark"
         :name="3"
         title="Confirmation"
         icon="check"
         :done="step > 3"
       >
-        <q-card class="bg-purple-1">
+        <q-card class="bg-primary">
           <q-card-section class="text-accent">
             <div class="text-h6">Business Details</div>
             <div><strong>Name:</strong> {{ businessName }}</div>
@@ -91,8 +91,8 @@
         </q-card>
 
         <q-stepper-navigation>
-          <q-btn rounded unelevated text-color="accent" flat @click="step = 1" color="warning" label="Back" class="q-mr-sm" />
-          <q-btn rounded unelevated text-color="accent" @click="createBusiness" color="positive" label="Create Business" />
+          <q-btn push text-color="white" @click="step = 1" color="negative" label="Back" class="q-mr-sm" />
+          <q-btn push text-color="white" @click="createBusiness" color="positive" label="Create Business" />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>

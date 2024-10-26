@@ -1,14 +1,14 @@
 <template>
   <q-dialog v-model="dialogOpen" persistent>
-    <q-card class="bg-dark text-white">
+    <q-card class="bg-white text-white">
       <q-card-section>
-        <q-input dark v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
+        <q-input bg-color="primary" outlined label-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-list bordered separator dark>
+        <q-list bordered separator class="bg-white text-accent">
           <q-item v-for="user in filteredUsers" :key="user.id" clickable v-ripple @click="addUserToProject(user)">
             <q-item-section>
               <q-item-label>{{ user }}</q-item-label>
@@ -16,11 +16,12 @@
           </q-item>
         </q-list>
 
-        <q-list bordered class="q-mt-md" dark>
-          <q-item-label header>Added members</q-item-label>
-          <q-item v-for="user in addedMembers" :key="user.id">
+        <q-list bordered class="q-mt-md bg-primary">
+          <q-item-label header class="text-accent">Added members</q-item-label>
+          <q-separator color="#FF0000" inset size="2px" class="q-ma-sm"/>
+          <q-item v-for="user in addedMembers" :key="user.id" class="bg-primary">
             <q-item-section>
-              <q-item-label>{{ user.username }}</q-item-label>
+              <q-item-label class="text-accent">{{ user.username }}</q-item-label>
               <q-select
                 v-model="user.role"
                 :options="roleOptions"
@@ -29,7 +30,10 @@
                 label="Role"
                 dense
                 options-dense
-                dark
+                outlined
+                bg-color="primary"
+                color="accent"
+                popup-content-class="text-accent bg-primary"
                 style="min-width: 100px;"
                 @update:model-value="updateUserRole(user)"
               />
@@ -42,8 +46,8 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn label="Add" color="primary" @click="onSubmit" />
-        <q-btn flat label="Close" color="primary" v-close-popup @click="closeDialog" />
+        <q-btn push label="Save" color="warning" @click="onSubmit" />
+        <q-btn push label="Close" color="info" v-close-popup @click="closeDialog" />
       </q-card-actions>
     </q-card>
   </q-dialog>

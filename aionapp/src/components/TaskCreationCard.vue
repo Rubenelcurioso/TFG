@@ -1,50 +1,69 @@
 <template>
-  <q-card class="task-creation-card bg-purple-2">
-    <q-toolbar class="bg-purple-3">
+  <q-card class="task-creation-card bg-white">
+    <q-toolbar class="bg-dark text-white">
       <q-toolbar-title>Add a task</q-toolbar-title>
-      <q-btn flat round dense icon="close" @click="closeDialog" color="negative" />
+      <q-btn flat round dense icon="close" @click="closeDialog" color="white" />
     </q-toolbar>
 
     <q-form @submit="onSubmit" class="q-gutter-md">
-      <q-card-section>
-        <q-input outlined color="accent" v-model="taskName" label="Task Name" :rules="taskNameRules" class="text-accent" />
+      <q-card-section class="q-ml-xs q-mt-md q-ma-none">
+        <q-input standout="bg-primary text-accent" outlined bg-color="primary" v-model="taskName" label="Task Name" :rules="taskNameRules" />
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section class="q-ml-xs q-ma-none">
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-input outlined color="accent" v-model="startDate" label="Start Date" type="date" :rules="startDateRules" text-color="accent" />
+            <q-input standout="bg-primary text-accent" outlined bg-color="primary" v-model="startDate" label="Start Date" type="date" :rules="startDateRules" text-color="accent" />
           </div>
           <div class="col-6">
-            <q-input outlined color="accent" v-model="endDate" label="End Date" type="date" :rules="endDateRules" text-color="accent" />
+            <q-input standout="bg-primary text-accent" outlined bg-color="primary" v-model="endDate" label="End Date" type="date" :rules="endDateRules" text-color="accent" />
           </div>
         </div>
       </q-card-section>
 
-      <q-card-section>
-        <div class="text-subtitle2">Priority</div>
-        <div class="q-gutter-sm">
-          <q-radio keep-color v-model="priority" val="L" label="Low" color="light-blue" class="text-accent" />
-          <q-radio keep-color v-model="priority" val="M" label="Medium" color="orange" class="text-accent" />
-          <q-radio keep-color v-model="priority" val="H" label="High" color="red" class="text-accent" />  
+      <q-card-section class="q-ml-xs q-ma-none">
+        <div class="text-subtitle2 text-accent">Priority</div>
+        <div class="q-gutter-sm row">
+          <div class="row justify-center items-center">
+            <q-radio keep-color v-model="priority" val="L" label="" color="light-blue" class="text-accent" />
+            <BadgeTypes label="LOW" />
+          </div>
+          <div class="row justify-center items-center">
+            <q-radio keep-color v-model="priority" val="M" label="" color="orange" class="text-accent" />
+            <BadgeTypes label="MEDIUM" />
+          </div>
+          <div class="row justify-center items-center">
+            <q-radio keep-color v-model="priority" val="H" label="" color="red" class="text-accent" />  
+            <BadgeTypes label="HIGH" />
+          </div>
         </div>
       </q-card-section> 
 
-      <q-card-section>
-        <div class="text-subtitle2">Status</div>
-        <div class="q-gutter-sm">
-          <q-radio keep-color v-model="status" val="TODO" label="To do" color="grey" class="text-accent" />
-          <q-radio keep-color v-model="status" val="IN_PROGRESS" label="In progress" color="blue" class="text-accent" />
-          <q-radio keep-color v-model="status" val="DONE" label="Done" color="green" class="text-accent" />  
+      <q-card-section class="q-ml-xs q-ma-none">
+        <div class="text-subtitle2 text-accent">Status</div>
+        <div class="q-gutter-sm row">
+          <div class="row justify-center items-center">
+            <q-radio keep-color v-model="status" val="TODO" label="" color="light-green " class="text-accent" />
+            <BadgeTypes label="To do" />
+          </div>
+          <div class="row justify-center items-center">
+            <q-radio keep-color v-model="status" val="IN_PROGRESS" label="" color="blue" class="text-accent" />
+            <BadgeTypes label="In progress" />
+          </div>
+          <div class="row justify-center items-center">
+            <q-radio keep-color v-model="status" val="DONE" label="" color="green" class="text-accent" />
+            <BadgeTypes label="Done" /> 
+          </div> 
         </div>
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section class="q-ml-xs q-ma-none">
         <q-select
           class="text-accent"
+          bg-color="primary"
           outlined
           color="accent"
-          popup-content-class="text-accent bg-purple-1"
+          popup-content-class="text-accent bg-primary"
           v-model="assignedUser"
           :options="userOptions"
           label="Assign to User"
@@ -52,12 +71,13 @@
         />
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section class="q-ml-xs q-ma-none">
         <q-select
           class="text-accent"
           outlined
+          bg-color="primary"
           color="accent"
-          popup-content-class="text-accent bg-purple-1"
+          popup-content-class="text-accent bg-primary"
           v-model="assignedTeam"
           :options="teamOptions"
           label="Assign to Team"
@@ -65,7 +85,7 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn rounded unelevated text-color="accent" type="submit" color="positive" label="Submit" />
+        <q-btn push unelevated text-color="white" type="submit" color="positive" label="Submit" />
       </q-card-actions>
     </q-form>
   </q-card>
@@ -76,9 +96,13 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { apiGet, apiPost } from '../utils/api-wrapper';
 import { useUserStore } from 'stores/user-store';
+import BadgeTypes from './BadgeTypes.vue';
 
 export default {
   name: 'TaskCreationCard',
+  components: {
+    BadgeTypes
+  },
   setup(props, { emit }) {
     const taskName = ref('');
     const startDate = ref('');
@@ -177,12 +201,12 @@ export default {
 }
 
 ::-webkit-scrollbar-track {
-  background: $purple-3;
+  background: $third;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $purple-4;
+  background: #FFFFFF;
   border-radius: 4px;
 }
 

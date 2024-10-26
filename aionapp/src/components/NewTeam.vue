@@ -1,45 +1,45 @@
 <template>
   <q-dialog v-model="dialogOpen" persistent backdrop-filter="blur(10px)">
-    <q-card class="bg-dark text-white">
+    <q-card class="bg-dark text-accent">
       <q-stepper
         v-model="step"
         color="accent"
         animated
         dark
-        class="bg-purple-2"
+        class="bg-white"
       >
       <q-step
-        color="primary"
+        color="dark"
         :name="1"
         title="Team Details"
         icon="people"
         :done="step > 1"
       >
-        <q-input outlined color="accent" text-color="accent" v-model="teamName" label="Team Name" :rules="[
+        <q-input standout="bg-primary text-accent" outlined bg-color="primary" color="accent" text-color="accent" v-model="teamName" label="Team Name" :rules="[
           val => val && val.length > 0 || 'Team name is required',
           val => val.length <= 255 || 'Team name too long'
         ]" />
-        <q-input outlined color="accent" text-color="accent" v-model="teamDescription" type="textarea" label="Team Description" />
+        <q-input standout="bg-primary text-accent" outlined bg-color="primary" color="accent" text-color="accent" v-model="teamDescription" type="textarea" label="Team Description" />
         
         <q-stepper-navigation>
-          <q-btn rounded unelevated @click="step = 2" color="positive" text-color="accent" label="Next" />
+          <q-btn push @click="step = 2" color="positive" text-color="white" label="Next" />
         </q-stepper-navigation>
       </q-step>
 
       <q-step
-        color="primary"
+        color="dark"
         :name="2"
         title="Add Members"
         icon="person_add"
         :done="step > 2"
       >
-        <q-input outlined color="accent" text-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
+        <q-input bg-color="primary" outlined label-color="accent" color="accent" text-color="accent" v-model="searchUser" label="Search User" @update:model-value="onSearchUser">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-list bordered separator class="bg-purple-2">
+        <q-list bordered separator class="bg-primary">
           <q-item v-for="user in filteredUsers" :key="user.id" clickable v-ripple @click="addUserToTeam(user)">
             <q-item-section>
               <q-item-label class="text-accent">{{ user }}</q-item-label>
@@ -47,8 +47,8 @@
           </q-item>
         </q-list>
 
-        <q-list bordered class="q-mt-md bg-purple-2">
-          <q-item-label header class="text-accent bg-purple-3">Added Members</q-item-label>
+        <q-list bordered class="q-mt-md bg-primary">
+          <q-item-label header class="text-accent bg-dark">Added Members</q-item-label>
           <q-item v-for="user in addedMembers" :key="user.id">
             <q-item-section>
               <q-item-label class="text-accent">{{ user }}</q-item-label>
@@ -60,19 +60,19 @@
         </q-list>
 
         <q-stepper-navigation>
-          <q-btn rounded unelevated @click="step = 1" color="warning" text-color="accent" label="Back" class="q-mr-sm" />
-          <q-btn rounded unelevated @click="step = 3" color="positive" text-color="accent" label="Next" />
+          <q-btn push @click="step = 1" color="negative" text-color="white" label="Back" class="q-mr-sm" />
+          <q-btn push @click="step = 3" color="positive" text-color="white" label="Next" />
         </q-stepper-navigation>
       </q-step>
 
       <q-step
-        color="primary"
+        color="dark"
         :name="3"
         title="Confirmation"
         icon="check"
         :done="step > 3"
       >
-        <q-card class="bg-purple-1">
+        <q-card class="bg-primary">
           <q-card-section class="text-accent">
             <div class="text-h6">Team Details</div>
             <div><strong>Name:</strong> {{ teamName }}</div>
@@ -81,13 +81,13 @@
         </q-card>
 
         <q-stepper-navigation>
-          <q-btn rounded unelevated @click="step = 1" color="warning" text-color="accent" label="Back" class="q-mr-sm" />
-          <q-btn rounded unelevated @click="createTeam" color="positive" text-color="accent" label="Create Team" />
+          <q-btn push @click="step = 1" color="negative" text-color="white" label="Back" class="q-mr-sm" />
+          <q-btn push @click="createTeam" color="positive" text-color="white" label="Create Team" />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
-    <q-card-actions align="right" class="bg-purple-3">
-      <q-btn  rounded flat label="Close" color="negative" v-close-popup />
+    <q-card-actions align="right" class="bg-dark">
+      <q-btn  push label="Close" color="info" v-close-popup />
     </q-card-actions>
   </q-card>
   </q-dialog>

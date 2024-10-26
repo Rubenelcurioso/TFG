@@ -26,6 +26,46 @@ const routes = [
   },
 
   {
+    path: '/privacy-policy',
+    component: () => import('layouts/MainLayout.vue'),
+    children:  [
+      { path: '', component: () => import('pages/PrivacyPoliticsPage.vue') }
+    ]
+  },
+
+  {
+    path: '/contact',
+    component: () => import('layouts/MainLayout.vue'),
+    children:  [
+      { path: '', component: () => import('pages/ContactPage.vue') }
+    ]
+  },
+
+  {
+    path: '/about-us',
+    component: () => import('layouts/MainLayout.vue'),
+    children:  [
+      { path: '', component: () => import('pages/AboutUsPage.vue') }
+    ]
+  },
+
+  {
+    path: '/security-best-practices',
+    component: () => import('layouts/MainLayout.vue'),
+    children:  [
+      { path: '', component: () => import('pages/SecurityBestPracticesPage.vue') }
+    ]
+  },
+
+  {
+    path: '/our-mission',
+    component: () => import('layouts/MainLayout.vue'),
+    children:  [
+      { path: '', component: () => import('pages/OurMissionPage.vue') }
+    ]
+  },
+
+  {
     path: '/home/:uid',
     component: () => import('layouts/LoggedLayout.vue'),
     meta: { requiresAuth: true },

@@ -1,28 +1,30 @@
 <template>
-  <q-card class="project-edit-card bg-purple-2 text-accent">
-    <q-toolbar class="bg-purple-3">
+  <q-card class="project-edit-card bg-white">
+    <q-toolbar class="bg-dark text-white">
       <q-toolbar-title>Editar proyecto</q-toolbar-title>
-      <q-btn flat round dense icon="close" @click="closeDialog" color="negative" />
+      <q-btn flat round dense icon="close" @click="closeDialog" color="white" />
     </q-toolbar>
 
     <q-form @submit="onSubmit" class="q-gutter-md">
-      <q-card-section>
-        <q-input outlined color="accent" v-model="projectName" label="Nombre del proyecto" :rules="projectNameRules" class="text-accent" />
+      <q-card-section class="q-ml-xs q-mt-md q-ma-none">
+        <q-input standout="bg-primary text-accent" outlined bg-color="primary" color="accent" v-model="projectName" label="Nombre del proyecto" :rules="projectNameRules" class="text-accent" />
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section class="q-ml-xs q-ma-none">
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-input outlined color="accent" v-model="startDate" label="Fecha de inicio" type="date" :rules="startDateRules" class="text-accent" />
+            <q-input standout="bg-primary text-accent" outlined bg-color="primary" color="accent" v-model="startDate" label="Fecha de inicio" type="date" :rules="startDateRules" class="text-accent" />
           </div>
           <div class="col-6">
-            <q-input outlined color="accent" v-model="endDate" label="Fecha de fin" type="date" :rules="endDateRules" class="text-accent" />
+            <q-input standout="bg-primary text-accent" outlined bg-color="primary" color="accent" v-model="endDate" label="Fecha de fin" type="date" :rules="endDateRules" class="text-accent" />
           </div>
         </div>
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section class="q-ml-xs q-ma-none">
         <q-select
+          outlined
+          bg-color="primary"
           class="text-accent"
           v-model="selectedBusiness"
           :options="businesses"
@@ -32,17 +34,16 @@
           emit-value
           map-options
           color="accent"
-          outlined
-          popup-content-class="text-accent bg-purple-1"
+          popup-content-class="text-accent bg-primary"
         />
       </q-card-section>
 
-      <q-card-section>
-        <q-input outlined class="text-accent" color="accent" v-model="description" label="Descripción" type="textarea"/>
+      <q-card-section class="q-ml-xs q-ma-none">
+        <q-input standout="bg-primary text-accent" outlined bg-color="primary" class="text-accent" color="accent" v-model="description" label="Descripción" type="textarea"/>
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn rounded unelevated text-color="accent" type="submit" color="warning" label="Actualizar" />
+        <q-btn push text-color="accent" type="submit" color="warning" label="Actualizar" />
       </q-card-actions>
     </q-form>
   </q-card>

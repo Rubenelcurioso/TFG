@@ -1,22 +1,24 @@
 <template>
-  <q-card class="bg-grey text-white">
+  <q-card class="bg-white text-accent generic-border-radius">
     <q-card-section>
       <div class="text-h6">{{ title }}</div>
     </q-card-section>
 
-    <q-separator dark />
+    <q-separator color="#FF0000" inset size="2px"/>
 
     <q-card-section>
       <q-table
         flat
-        bordered
+        generic-border-radius
+        table-class="text-accent"
+        table-header-class="bg-dark text-white"
         :rows="tasks"
         :columns="columns"
         row-key="id"
         :filter="filter"  
       >
         <template v-slot:top-right>
-          <q-input dense debounce="300" v-model="filter" placeholder="Search">
+          <q-input bg-color="primary" outlined label-color="accent" debounce="300" v-model="filter" placeholder="Search">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
@@ -26,7 +28,12 @@
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.name === 'start_date' || col.name === 'end_date' ? formatDate(props.row[col.field]) : props.row[col.field] }}
+              <template v-if="col.name === 'priority' || col.name === 'status'">
+                <BadgeTypes :label="props.row[col.field]" />
+              </template>
+              {{ col.name === 'name' ? props.row['name'] : '' }}
+              {{ col.name === 'team' ? props.row['team'] : '' }}
+              {{ col.name === 'start_date' || col.name === 'end_date' ? formatDate(props.row[col.field]) : '' }}
             </q-td>
           </q-tr>
         </template>
@@ -39,7 +46,8 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { apiGet } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
-import { date } from 'quasar'
+import { date } from 'quasar';
+import BadgeTypes from './BadgeTypes.vue';
 
 export default defineComponent({
   name: 'TaskList',
@@ -52,6 +60,9 @@ export default defineComponent({
       type: Boolean,
       required: true,
     },
+  },
+  components: {
+    BadgeTypes
   },
   setup(props) {
     const store = useUserStore();

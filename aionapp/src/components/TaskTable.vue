@@ -1,8 +1,12 @@
 <template>
-  <div class="q-pa-md bg-purple-1">
+  <div class="q-ma-none bg-white">
+    <div class="text-h6 text-accent">Tasks</div>
+    <q-separator color="#FF0000" inset size="2px"/>
     <q-table    
-      bordered
-      title="Tasks"
+      flat
+      table-class="text-accent"
+      table-header-class="bg-dark text-white"
+      title=""
       :rows="rows"
       :columns="columns"
       row-key="id"
@@ -15,9 +19,9 @@
     <template v-slot:top>
       <div>
         <q-btn-group rounded unelevated>
-          <q-btn outline icon="add" color="positive" @click="showDialog" label="New task" class="q-mr-sm" :disable="userRolePerm < 7" />
-          <q-btn outline icon="edit" color="warning" @click="editSelectedRow" label="Edit selected" :disable="!selected.length || userRolePerm < 7" class="q-mr-sm" />
-          <q-btn outline icon="delete" color="negative" @click="removeSelectedRows" label="Remove selected" :disable="!selected.length || userRolePerm < 7" />
+          <q-btn push icon="add" color="positive" @click="showDialog" label="New task" class="q-mr-none" :disable="userRolePerm < 7" />
+          <q-btn push icon="edit" color="warning" @click="editSelectedRow" label="Edit selected" :disable="!selected.length || userRolePerm < 7" class="q-mr-none" />
+          <q-btn push icon="delete" color="negative" @click="removeSelectedRows" label="Remove selected" :disable="!selected.length || userRolePerm < 7" />
         </q-btn-group>
       </div>
     </template>
@@ -28,7 +32,14 @@
           <q-checkbox v-model="props.selected" />
         </q-td>
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          {{ props.row[col.field] }}
+          <template v-if="col.name === 'priority' || col.name === 'status'">
+            <BadgeTypes :label="props.row[col.field]" />
+          </template>
+          {{ col.name === 'name' ? props.row['name'] : '' }}
+          {{ col.name === 'team' ? props.row['team'] : '' }}
+          {{ col.name === 'user' ? props.row['user'] : '' }}
+          {{ col.name === 'start_date' ? props.row['start_date'] : '' }}
+          {{ col.name === 'end_date' ? props.row['end_date'] : '' }}
         </q-td>
       </q-tr>
     </template>
@@ -49,6 +60,7 @@
 import { defineComponent, ref, onMounted, watch } from 'vue'
 import TaskCreationCard from 'components/TaskCreationCard.vue'
 import TaskEditCard from 'components/TaskEditCard.vue'
+import BadgeTypes from 'components/BadgeTypes.vue'
 import { apiGet, apiDelete, apiPut } from '../utils/api-wrapper'
 import { useRoute } from 'vue-router'
 import { useUserStore } from 'stores/user-store'
@@ -74,7 +86,8 @@ export default defineComponent({
   name: 'TaskTable',
   components : {
     TaskCreationCard,
-    TaskEditCard
+    TaskEditCard,
+    BadgeTypes
     },
   setup () {
     const route = useRoute()

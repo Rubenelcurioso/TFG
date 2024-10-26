@@ -1,16 +1,16 @@
 <template>
-    <q-card class="bg-grey text-white">
+    <q-card class="bg-white text-accent">
       <q-card-section>
         <div class="row items-center justify-between">
-          <div class="text-h6">Equipos de tareas</div>
+          <div class="text-h6">My teams</div>
         </div>
       </q-card-section>
   
-      <q-separator dark />
+      <q-separator color="#FF0000" inset size="2px"/>
   
       <q-card-section>
         
-        <q-list class="bg-white" bordered separator>
+        <q-list class="bg-primary" bordered separator>
           <q-item v-for="team in teams" :key="team.id" clickable v-ripple>
             <q-item-section avatar>
               <q-avatar :color="team.color" text-color="dark">
