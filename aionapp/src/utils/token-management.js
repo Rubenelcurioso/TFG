@@ -1,9 +1,7 @@
 import { api } from 'boot/axios';
-import { useRouter } from 'vue-router';
 import { LocalStorage } from 'quasar';
 
 
-const router = useRouter();
 const TOKEN_KEY = 'aTkn';
 const REFRESH_TOKEN_KEY = 'rTkn';
 
@@ -83,9 +81,9 @@ export function isTokenExpired(token, ts, tl) {
 
   const now = Date.now();
   const diff = now - ts;
+  const safetyMargin = 30 * 1000; // 30 seconds in milliseconds
 
-  // Here is the life time of the tokens
-  // CHANGE IN THE FUTURE: FIX
+  // Token lifetimes
   let lifeTime = 0;
   if(tl == '1d'){
     lifeTime = 1000 * 60 * 60 * 24;
@@ -93,7 +91,8 @@ export function isTokenExpired(token, ts, tl) {
     lifeTime = 1000 * 60 * 15;
   }
 
-  if(diff >= lifeTime) return true;
+  // Subtract safety margin from lifetime for earlier renewal
+  if(diff >= (lifeTime - safetyMargin)) return true;
   return false;
 }
 
@@ -118,7 +117,6 @@ export async function refreshToken() {
       return accessToken;
     }else{
       removeTokens();
-      router.push('/login');
       throw new Error('Tokens expired, redirected to login');
     }
   } catch (error) {

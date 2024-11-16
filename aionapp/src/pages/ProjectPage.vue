@@ -29,11 +29,6 @@
         <q-tab-panel name="properties" class="bg-white">
           <ProjectInfo
             :pid=Number(route.params.pid)
-            :description="description"
-            :createdAt=createdAt
-            :endDate=endDate
-            :progress="progress"
-            :linkedBusiness="linkedBusiness"
           />
         </q-tab-panel>
 
@@ -66,7 +61,6 @@ import ProjectInfo from 'components/ProjectInfo.vue';
 import UserProjectManagement from 'components/UserProjectManagement.vue';
 import ApexCharts from 'components/ApexCharts.vue';
 import { apiGet } from '../utils/api-wrapper';
-import { useUserStore } from 'stores/user-store';
 
 export default defineComponent({
   name: 'ProjectPage',
@@ -78,25 +72,16 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const tab = ref('properties')
-    const projectName = ref('')
-    const projectId = ref(route.params.pid)    
-    const createdAt = ref('')
-    const endDate = ref('')
-    const description = ref('')
-    const progress = ref(0.00)
-    const linkedBusiness = ref('')
-    const store = useUserStore();
+    const tab = ref('properties');
+    const project_id = Number(route.params.pid);
+    const projectName = ref('');
+    const description = ref('');
 
     const fetchProjectData = async () => {
-      const response = await apiGet('/project/'+projectId.value+'/');
+      const response = await apiGet('/project/' + project_id + '/');
       projectName.value = response.name;
-      createdAt.value = response.start_date;
-      endDate.value = response.end_date;
       description.value = response.description;
-      progress.value = response.progress;
-      linkedBusiness.value = response.business_name;
-    }
+    };
 
     onMounted(() => {
       fetchProjectData();
@@ -104,14 +89,10 @@ export default defineComponent({
 
     return {
       tab,
-      projectName,
-      createdAt,
-      endDate,
-      progress,
-      description,
       route,
-      linkedBusiness
-    }
+      projectName,
+      description
+    };
   }
 });
 </script>

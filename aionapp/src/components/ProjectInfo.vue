@@ -23,32 +23,41 @@
 </template>
 
 <script>
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import { useUserStore } from 'stores/user-store';
 import ProjectEditCard from 'components/ProjectEditCard.vue';
+import { apiGet } from '../utils/api-wrapper';
 
 export default defineComponent({
   name: 'ProjectInfo',
   props: {
-    pid: Number,
-    description: String,
-    createdAt: String,
-    endDate: String,
-    progress: Number,
-    linkedBusiness: String
+    pid: Number
   },
   components:{
     ProjectEditCard
   },
   setup(props){
     const project_id = props.pid;
-    const description = ref(props.description);
-    const creationDate = ref(props.createdAt);
-    const endingDate = ref(props.endDate);
-    const progression = ref(props.progress);
-    const businessName = ref(props.business);
+    const description = ref('');
+    const creationDate = ref('');
+    const endingDate = ref('');
+    const progression = ref(0.00);
+    const businessName = ref('');
     const editDialogVisible = ref(false);
     const store = useUserStore();
+
+    const fetchProjectData = async () => {
+      const response = await apiGet('/project/'+project_id+'/');
+      description.value = response.description;
+      creationDate.value = response.start_date;
+      endingDate.value = response.end_date;
+      progression.value = response.progress;
+      businessName.value = response.business_name;
+    };
+
+    onMounted(() => {
+      fetchProjectData();
+    });
 
     const editProjectDialog = () => {
       if(store.projects.find(project => project.id === project_id).role_perm >= 63){
@@ -58,29 +67,11 @@ export default defineComponent({
 
     const onProjectUpdated = () => {
       editDialogVisible.value = false;
+      fetchProjectData();
     }
 
-    watch(() => props.description, (newVal) => {
-      description.value = newVal;
-    });
-
-    watch(() => props.createdAt, (newVal) => {
-      creationDate.value = newVal;
-    });
-
-    watch(() => props.endDate, (newVal) => {
-      endingDate.value = newVal;
-    });
-
-    watch(() => props.progress, (newVal) => {
-      progression.value = newVal;
-    });
-
-    watch(() => props.linkedBusiness, (newVal) => {
-      businessName.value = newVal;
-    });
-
     return{
+      description,
       creationDate,
       endingDate,
       progression,

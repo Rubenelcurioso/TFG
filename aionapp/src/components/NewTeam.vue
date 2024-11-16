@@ -106,7 +106,7 @@ export default {
       required: true
     }
   },
-  setup(props) {
+  setup(props, { emit }) {
     const dialogOpen = ref(true)
     const step = ref(1)
     const teamName = ref('')
@@ -161,7 +161,7 @@ export default {
             await apiPut('/new/member/', memberData);
           }
           dialogOpen.value = false;
-          $emit('team-created');
+          emit('team-created')
         } else {
           throw new Error('Failed to create team');
         }

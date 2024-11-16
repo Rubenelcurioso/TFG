@@ -13,7 +13,6 @@
       :selected-rows-label="getSelectedString"
       selection="single"
       v-model:selected="selected"
-      loading="true"
     >
     
     <template v-slot:top>

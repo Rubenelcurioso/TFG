@@ -52,7 +52,7 @@
 
       <q-card-actions align="right" v-if="isOwner" class="bg-white">
         <q-btn push text-color="white" color="positive" label="Add employee" @click="showNewEmployeeDialog = true" />
-        <NewEmployee v-model="showNewEmployeeDialog" :bid="route.params.bid" @employee-added="showNewEmployeeDialog = false" />
+        <NewEmployee v-model="showNewEmployeeDialog" :bid="route.params.bid" @employee-added="onEmployeeAdded" />
       </q-card-actions>
     </q-card>
 
@@ -78,12 +78,12 @@
 
       <q-card-actions align="right" v-if="isOwner" class="bg-white">
         <q-btn push text-color="white" color="positive" label="Add Team" @click="showNewTeamDialog = true" />
-        <NewTeam v-model="showNewTeamDialog" :bid="route.params.bid" @team-created="showNewTeamDialog = false" />
+        <NewTeam v-model="showNewTeamDialog" :bid="route.params.bid" @team-created="onTeamCreated" />
       </q-card-actions>
     </q-card>
 
     <q-dialog v-model="editDialogVisible" backdrop-filter="blur(10px)">
-      <TeamEditCard :team="selectedTeam" :bid="route.params.bid" @team-updated="editDialogVisible = false" @close-dialog="editDialogVisible = false" />
+      <TeamEditCard :team="selectedTeam" :bid="route.params.bid" @team-updated="onTeamUpdated" @close-dialog="editDialogVisible = false" />
     </q-dialog>
     
   </q-page>
@@ -189,6 +189,21 @@ export default {
       editDialogVisible.value = true
     }
 
+    const onEmployeeAdded = () => {
+      showNewEmployeeDialog.value = false
+      fetchEmployees()
+    }
+
+    const onTeamCreated = () => {
+      showNewTeamDialog.value = false
+      fetchTeams()
+    }
+
+    const onTeamUpdated = () => {
+      editDialogVisible.value = false
+      fetchTeams()
+    }
+
     onMounted(() => {
       fetchBusiness()
       fetchEmployees()
@@ -212,7 +227,10 @@ export default {
       editDialogVisible,
       selectedTeam,
       openTeamEditDialog,
-      isOwner
+      isOwner,
+      onEmployeeAdded,
+      onTeamCreated,
+      onTeamUpdated
     }
   }
 }

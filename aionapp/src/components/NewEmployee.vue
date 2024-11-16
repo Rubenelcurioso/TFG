@@ -30,7 +30,7 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn push label="Add" color="positive" text-color="white" @click="onSubmit" />
+        <q-btn push label="Add" color="positive" text-color="white" @click="onSubmit" v-close-popup />
         <q-btn push label="Close" color="negative" v-close-popup />
       </q-card-actions>
     </q-card>
@@ -50,7 +50,7 @@ export default {
       required: true
     }
   },
-  setup(props) {
+  setup(props, { emit }) {
     const dialogOpen = ref(true)
     const searchUser = ref('')
     const filteredUsers = ref([])
@@ -93,7 +93,7 @@ export default {
         }
       }
       dialogOpen.value = false;
-      $emit('employee-added');
+      emit('employee-added');
     }
 
     return {
