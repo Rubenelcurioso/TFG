@@ -63,6 +63,7 @@ import BadgeTypes from 'components/BadgeTypes.vue'
 import { apiGet, apiDelete, apiPut } from '../utils/api-wrapper'
 import { useRoute } from 'vue-router'
 import { useUserStore } from 'stores/user-store'
+import { useQuasar } from 'quasar'
 
 const columns = [
         {
@@ -96,6 +97,7 @@ export default defineComponent({
     const rows = ref([])
     const store = useUserStore()
     const userRolePerm = ref(store.projects.find(project => project.id === parseInt(route.params.pid)).role_perm)
+    const $q = useQuasar()
 
     const getSelectedString = () => {
       return selected.value.length === 0 ? '' : `${selected.value.length} record${selected.value.length > 1 ? 's' : ''} selected of ${rows.value.length}`
@@ -121,8 +123,10 @@ export default defineComponent({
         }
         await fetchTasks();
         selected.value = [];
+        $q.notify({ type: 'positive', message: 'Tasks removed successfully', position: 'bottom-right' })
       } catch (error) {
         console.error('Error removing tasks:', error);
+        $q.notify({ type: 'negative', message: 'Error removing tasks', position: 'bottom-right' })
       }
     }
 
@@ -136,11 +140,13 @@ export default defineComponent({
       await fetchTasks();
       editDialogVisible.value = false;
       selected.value = [];
+      $q.notify({ type: 'positive', message: 'Task updated successfully', position: 'bottom-right' })
     }
 
     const onTaskCreate = async () => {
       await fetchTasks();
       dialogVisible.value = false;
+      $q.notify({ type: 'positive', message: 'Task created successfully', position: 'bottom-right' })
     }
 
     onMounted(() => {

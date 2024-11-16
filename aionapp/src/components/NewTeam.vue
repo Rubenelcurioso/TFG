@@ -97,6 +97,7 @@
 import { ref } from 'vue'
 import { apiPost, apiGet, apiPut } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
+import { useQuasar } from 'quasar';
 
 export default {
   name: 'NewTeam',
@@ -115,6 +116,7 @@ export default {
     const filteredUsers = ref([])
     const addedMembers = ref([])
 
+    const $q = useQuasar();
 
     const onSearchUser = async (val) => {
       if (val.length >= 3) {
@@ -162,11 +164,21 @@ export default {
           }
           dialogOpen.value = false;
           emit('team-created')
+          $q.notify({
+            type: 'positive',
+            message: 'Team created successfully',
+            position: 'bottom-right'
+          });
         } else {
           throw new Error('Failed to create team');
         }
       } catch (error) {
         console.error('Error creating team:', error);
+        $q.notify({
+          type: 'negative',
+          message: 'Error creating team',
+          position: 'bottom-right'
+        });
         // Handle error (e.g., show error message to user)
       }
     }

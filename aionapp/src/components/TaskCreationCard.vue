@@ -97,6 +97,7 @@ import { useRoute } from 'vue-router';
 import { apiGet, apiPost } from '../utils/api-wrapper';
 import { useUserStore } from 'stores/user-store';
 import BadgeTypes from './BadgeTypes.vue';
+import { useQuasar } from 'quasar';
 
 export default {
   name: 'TaskCreationCard',
@@ -115,6 +116,7 @@ export default {
     const userOptions = ref([]);
     const teamOptions = ref([]);
     const store = useUserStore();
+    const $q = useQuasar();
 
     const loadUserOptions = async () => {
       const response = await apiGet('/project/'+route.params.pid+'/users/');
@@ -163,6 +165,7 @@ export default {
         emit('task-created');
       } catch (error) {
         console.error('Error creating task:', error);
+        $q.notify({ type: 'negative', message: 'Error creating task', position: 'bottom-right' });
       }
     };
 

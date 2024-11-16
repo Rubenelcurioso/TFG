@@ -97,6 +97,7 @@ import { useRoute } from 'vue-router'
 import NewTeam from 'components/NewTeam.vue'
 import NewEmployee from 'components/NewEmployee.vue'
 import TeamEditCard from 'components/TeamEditCard.vue'
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'BusinessPage',
@@ -115,6 +116,7 @@ export default {
     const showNewTeamDialog = ref(false)
     const showNewEmployeeDialog = ref(false)
     const selectedTeam = ref(null)
+    const $q = useQuasar()
 
     const isOwner = computed(() => {
       return store.businesses.some(business => business.id == route.params.bid && business.owner === store.uid)
@@ -152,8 +154,10 @@ export default {
       try {
         await apiDelete(`/remove/employee/${route.params.bid}/${employee}/`)
         fetchEmployees()
+        $q.notify({ type: 'positive', message: 'Employee deleted successfully', position: 'bottom-right' })
       } catch (error) {
         console.error('Error deleting employee:', error)
+        $q.notify({ type: 'negative', message: 'Error deleting employee', position: 'bottom-right' })
       }
     }
 
@@ -162,8 +166,10 @@ export default {
       try {
         await apiDelete(`/remove/team/${route.params.bid}/${teamId}/`)
         fetchTeams()
+        $q.notify({ type: 'positive', message: 'Team deleted successfully', position: 'bottom-right' })
       } catch (error) {
         console.error('Error deleting team:', error)
+        $q.notify({ type: 'negative', message: 'Error deleting team', position: 'bottom-right' })
       }
     }
 
@@ -178,8 +184,10 @@ export default {
           email: business.value.email,
         }
         await apiPut(`/business/update/`, businessData)
+        $q.notify({ type: 'positive', message: 'Business information saved successfully', position: 'bottom-right' })
       } catch (error) {
         console.error('Error saving business:', error)
+        $q.notify({ type: 'negative', message: 'Error saving business information', position: 'bottom-right' })
       }
     }
 

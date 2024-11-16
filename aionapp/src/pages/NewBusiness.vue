@@ -104,10 +104,12 @@ import { ref } from 'vue'
 import { apiPost, apiGet } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'NewBusiness',
   setup() {
+    const $q = useQuasar()
     const step = ref(1)
     const businessName = ref('')
     const businessDescription = ref('')
@@ -165,13 +167,22 @@ export default {
             };
             await apiPost('/new/employee/', employeeData);
           }
+          $q.notify({
+            type: 'positive',
+            message: 'Business created successfully!',
+            position: 'bottom-right'
+          });
           await router.push(`/home/${store.uid}/business/${businessResponse.id}/`);
         } else {
           throw new Error('Failed to create business');
         }
       } catch (error) {
         console.error('Error creating business:', error);
-        // Handle error (e.g., show error message to user)
+        $q.notify({
+          type: 'negative',
+          message: 'Error creating business: ' + error.message,
+          position: 'bottom-right'
+        });
       }
     }
 

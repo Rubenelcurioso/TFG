@@ -18,6 +18,7 @@
   import { apiPost } from '../utils/api-wrapper'
   import { setToken, setRefreshToken } from '../utils/token-management'
   import { useUserStore } from 'stores/user-store'
+  import { useQuasar } from 'quasar'
 
   export default defineComponent({
     name: 'RegisterPage',
@@ -56,6 +57,7 @@
       ]
 
       const router = useRouter()
+      const $q = useQuasar()
 
       const onSubmit = async (formData) => {
               try {
@@ -67,10 +69,19 @@
                   uid: user,
                   username: username
                 })
-                router.push(`/home/${user}`)              
+                $q.notify({
+                  type: 'positive',
+                  message: 'Registration successful!',
+                  position: 'bottom-right'
+                })
+                router.push(`/home/${user}`)
               } catch (error) {
                 console.error('Registration failed', error)
-                alert('Registration failed: ' + (error.response?.data?.message || error.message))
+                $q.notify({
+                  type: 'negative',
+                  message: 'Registration failed: check the fields and try again',
+                  position: 'bottom-right'
+                })
               }
       }
 

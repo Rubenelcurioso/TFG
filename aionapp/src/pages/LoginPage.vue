@@ -18,11 +18,13 @@ import { useRouter } from 'vue-router'
 import { apiPost } from '../utils/api-wrapper'
 import { setToken, setRefreshToken } from '../utils/token-management'
 import { useUserStore } from 'stores/user-store'
+import { useQuasar } from 'quasar'
 
 export default defineComponent({
   name: 'LoginPage',
   components: { AuthForm },
   setup() {
+    const $q = useQuasar()
     const fields = [
       { name: 'username', label: 'Username', type: 'text' },
       { name: 'password', label: 'Password', type: 'password' }
@@ -42,10 +44,19 @@ export default defineComponent({
           uid: user,
           username: username
         })
+        $q.notify({
+          type: 'positive',
+          message: 'Login successful',
+          position: 'bottom-right'
+        })
         router.push(`/home/${user}`)    
       } catch (error) {
         console.error('Login failed', error)
-        errorMessage.value = 'Login failed: ' + (error.response?.data?.message || error.message)
+        $q.notify({
+          type: 'negative',
+          message: 'Login failed: the username or password is incorrect',
+          position: 'bottom-right'
+        })
       }
     }
 

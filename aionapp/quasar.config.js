@@ -111,7 +111,8 @@ export default configure((ctx) => {
       // Quasar plugins
       plugins: [
         'Cookies',
-        'LocalStorage'
+        'LocalStorage',
+        'Notify'
       ]
     },
 

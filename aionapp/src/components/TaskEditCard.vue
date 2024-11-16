@@ -97,6 +97,7 @@ import { useRoute } from 'vue-router';
 import { apiGet, apiPut } from '../utils/api-wrapper';
 import { useUserStore } from 'stores/user-store';
 import BadgeTypes from './BadgeTypes.vue';
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'TaskEditCard',
@@ -122,6 +123,7 @@ export default {
     const teamOptions = ref([]);
     const refresh = inject('refresh');
     const store = useUserStore();
+    const $q = useQuasar()
 
     const loadTaskData = async () => {
       try {
@@ -186,6 +188,7 @@ export default {
         closeDialog();
       } catch (error) {
         console.error('Error updating task:', error);
+        $q.notify({ type: 'negative', message: 'Error updating task', position: 'bottom-right' })
       }
     };
 

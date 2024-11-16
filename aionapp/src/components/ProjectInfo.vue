@@ -27,6 +27,7 @@ import { defineComponent, ref, onMounted } from 'vue';
 import { useUserStore } from 'stores/user-store';
 import ProjectEditCard from 'components/ProjectEditCard.vue';
 import { apiGet } from '../utils/api-wrapper';
+import { useQuasar } from 'quasar';
 
 export default defineComponent({
   name: 'ProjectInfo',
@@ -45,14 +46,23 @@ export default defineComponent({
     const businessName = ref('');
     const editDialogVisible = ref(false);
     const store = useUserStore();
+    const $q = useQuasar();
 
     const fetchProjectData = async () => {
-      const response = await apiGet('/project/'+project_id+'/');
-      description.value = response.description;
-      creationDate.value = response.start_date;
-      endingDate.value = response.end_date;
-      progression.value = response.progress;
-      businessName.value = response.business_name;
+      try {
+        const response = await apiGet('/project/'+project_id+'/');
+        description.value = response.description;
+        creationDate.value = response.start_date;
+        endingDate.value = response.end_date;
+        progression.value = response.progress;
+        businessName.value = response.business_name;
+      } catch (error) {
+        $q.notify({
+          type: 'negative',
+          message: 'Error fetching project data',
+          position: 'bottom-right'
+        });
+      }
     };
 
     onMounted(() => {
@@ -62,12 +72,23 @@ export default defineComponent({
     const editProjectDialog = () => {
       if(store.projects.find(project => project.id === project_id).role_perm >= 63){
         editDialogVisible.value = true;
+      } else {
+        $q.notify({
+          type: 'warning',
+          message: 'Insufficient permissions to edit project',
+          position: 'bottom-right'
+        });
       }
     };
 
     const onProjectUpdated = () => {
       editDialogVisible.value = false;
       fetchProjectData();
+      $q.notify({
+        type: 'positive',
+        message: 'Project updated successfully',
+        position: 'bottom-right'
+      });
     }
 
     return{

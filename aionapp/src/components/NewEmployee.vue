@@ -41,6 +41,7 @@
 import { ref } from 'vue'
 import { apiGet, apiPost } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
+import { useQuasar } from 'quasar';
 
 export default {
   name: 'NewEmployee',
@@ -56,6 +57,7 @@ export default {
     const filteredUsers = ref([])
     const addedMembers = ref([])
     const userStore = useUserStore();
+    const $q = useQuasar();
 
     const onSearchUser = async (val) => {
       if (val.length >= 3) {
@@ -88,8 +90,17 @@ export default {
             username: employee,
             business: props.bid
           });
+          $q.notify({
+            type: 'positive',
+            message: `Employee ${employee} added successfully`,
+            position: 'bottom-right'
+          });
         } catch (error) {
-          console.error(`Error adding employee ${employee}:`, error);
+          $q.notify({
+            type: 'negative',
+            message: `Error adding employee ${employee}`,
+            position: 'bottom-right'
+          });
         }
       }
       dialogOpen.value = false;

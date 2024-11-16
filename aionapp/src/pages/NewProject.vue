@@ -81,10 +81,12 @@ import { ref } from 'vue'
 import { apiPost, apiGet } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'NewProject',
   setup() {
+    const $q = useQuasar()
     const step = ref(1)
     const projectName = ref('')
     const projectDescription = ref('')
@@ -157,13 +159,22 @@ export default {
             };
             await apiPost('/userprojectrole/', userProjectRoleData);
           }
+          $q.notify({
+            type: 'positive',
+            message: 'Project created successfully!',
+            position: 'bottom-right'
+          });
           await router.push(`/home/${store.uid}/project/${projectResponse.id}/`);
         } else {
           throw new Error('Failed to create project');
         }
       } catch (error) {
         console.error('Error creating project:', error);
-        // Handle error (e.g., show error message to user)
+        $q.notify({
+          type: 'negative',
+          message: 'Error creating project: ' + error.message,
+          position: 'bottom-right'
+        });
       }
     }
 

@@ -57,6 +57,7 @@
 import { ref, onMounted } from 'vue'
 import { apiGet, apiPut, apiDelete } from '../utils/api-wrapper'
 import { useUserStore } from 'stores/user-store';
+import { useQuasar } from 'quasar';
 
 export default {
   name: 'NewUserProject',
@@ -78,6 +79,7 @@ export default {
     const userStore = useUserStore();
     const roleOptions = ref([])
     const model = ref(null)
+    const $q = useQuasar();
 
     const fetchRoles = async () => {
       try {
@@ -86,7 +88,11 @@ export default {
           .filter(role => role.name.toLowerCase() !== 'owner')
           .map(role => ({ value: role.id, label: role.name }));   
       } catch (error) {
-        console.error('Error fetching roles:', error);
+        $q.notify({
+          type: 'negative',
+          message: 'Error fetching roles',
+          position: 'bottom-right'
+        });
       }
     }
 
@@ -120,9 +126,22 @@ export default {
       if (projectRolePerm >= 31) {
         const userToRemove = addedMembers.value.find(u => u.username === user.username);
         if (userToRemove && projectRolePerm > userToRemove.role_perm) {
-          const response = await apiDelete(`/remove/user/${user.username}/${props.pid}/`);
-          addedMembers.value = addedMembers.value.filter(u => u.username !== user.username);
-          emit('user-mod');
+          try {
+            const response = await apiDelete(`/remove/user/${user.username}/${props.pid}/`);
+            addedMembers.value = addedMembers.value.filter(u => u.username !== user.username);
+            emit('user-mod');
+            $q.notify({
+              type: 'positive',
+              message: `User ${user.username} removed successfully`,
+              position: 'bottom-right'
+            });
+          } catch (error) {
+            $q.notify({
+              type: 'negative',
+              message: `Error removing user ${user.username}`,
+              position: 'bottom-right'
+            });
+          }
         } else {
           console.warn('Cannot remove user with equal or higher role permission');
         }
@@ -150,8 +169,17 @@ export default {
               role: role_id.value
               };
               const response = await apiPut('/userprojectrole/update/', userData);
+              $q.notify({
+                type: 'positive',
+                message: `User ${user.username} added successfully`,
+                position: 'bottom-right'
+              });
             } catch (error) {
-              console.error(`Error adding user ${user.username} to project:`, error);
+              $q.notify({
+                type: 'negative',
+                message: `Error adding user ${user.username} to project`,
+                position: 'bottom-right'
+              });
             }
           }
         }
