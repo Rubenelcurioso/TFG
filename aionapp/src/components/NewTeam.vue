@@ -87,7 +87,7 @@
       </q-step>
     </q-stepper>
     <q-card-actions align="right" class="bg-dark">
-      <q-btn  push label="Close" color="info" v-close-popup />
+      <q-btn  push label="Close" color="negative" v-close-popup />
     </q-card-actions>
   </q-card>
   </q-dialog>

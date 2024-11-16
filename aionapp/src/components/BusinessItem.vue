@@ -36,7 +36,7 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Cancel" color="warning" v-close-popup />
           <q-btn flat label="Delete" color="negative" @click="deleteBusiness" v-close-popup />
         </q-card-actions>
       </q-card>

@@ -46,8 +46,8 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn push label="Save" color="warning" @click="onSubmit" />
-        <q-btn push label="Close" color="info" v-close-popup @click="closeDialog" />
+        <q-btn push label="Save" color="positive" @click="onSubmit" />
+        <q-btn push label="Close" color="negative" v-close-popup @click="closeDialog" />
       </q-card-actions>
     </q-card>
   </q-dialog>

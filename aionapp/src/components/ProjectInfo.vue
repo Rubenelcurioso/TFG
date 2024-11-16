@@ -10,7 +10,7 @@
     <q-linear-progress :value="progression/100" size="20px" rounded color="info" class="q-mt-sm q-mb-sm" />
     <p class="text-accent q-mt-sm q-mb-none sans-serif">Business</p>
     <q-input standout v-model="businessName" label=" " class="text-accent bg-primary generic-border-radius" readonly/>
-    <q-btn push label="Edit Project" color="dark" @click="editProjectDialog" class="text-accent q-mt-md" />
+    <q-btn push label="Edit Project" color="warning" @click="editProjectDialog" class="text-accent q-mt-md" />
   </div>
 
   <q-dialog v-model="editDialogVisible" backdrop-filter="blur(10px)">
