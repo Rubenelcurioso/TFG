@@ -37,14 +37,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if User.objects.filter(username=attrs['username']).exists():
             raise serializers.ValidationError({'username': 'Username already exists'})
+        if User.objects.filter(email=attrs['email']).exists():
+            raise serializers.ValidationError({'email': 'Email already exists'})
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
 
     def create(self, validated_data):
         validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
-        AuthUser.objects.create_user(username=user.username, password=validated_data['password'], is_superuser=False, is_staff=False)        
+        password = validated_data.pop('password')
+        email = validated_data.pop('email')
+        username = validated_data.pop('username')
+        user = User.objects.create_user(username=username, email=email, password=password, **validated_data)
         return user
 
 

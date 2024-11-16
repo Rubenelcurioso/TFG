@@ -13,7 +13,7 @@
                     <q-item-label class="text-accent">{{ project.name }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                    <q-badge color="negative" :label="`${project.progress}%`" />                
+                    <q-badge :style="{ background: getProgressGradient(project.progress) }" :label="`${project.progress}%`" />                
                 </q-item-section>
                 <q-item-section side v-if="project.role_perm >= 63">
                     <q-btn flat round color="negative" icon="close" @click.stop="confirmDelete(project.id)">
@@ -84,6 +84,18 @@ export default {
       }
     }
 
+    const getProgressGradient = (progress) => {
+      let color
+      if (progress >= 75 && progress <= 100) {
+        color = '#66754b' // Positive color
+      } else if (progress >= 50 && progress < 75) {
+        color = '#E9A178' // Warning color
+      } else {
+        color = '#C45D4E' // Negative color
+      }
+      return color;
+    }
+
     onMounted(fetchProjects)
 
     return {
@@ -91,7 +103,8 @@ export default {
       projects,
       confirmDeleteDialog,
       confirmDelete,
-      deleteProject
+      deleteProject,
+      getProgressGradient
     }
   }
 }

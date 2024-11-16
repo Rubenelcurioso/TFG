@@ -57,6 +57,7 @@
       ]
 
       const router = useRouter()
+      const store = useUserStore()
       const $q = useQuasar()
 
       const onSubmit = async (formData) => {

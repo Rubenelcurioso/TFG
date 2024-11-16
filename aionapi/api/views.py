@@ -74,7 +74,7 @@ class BusinessList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, business_id=None):
-        if business_id:
+        if (business_id):
             try:
                 business = Business.objects.get(id=business_id)
                 # Check if the user is an employee of the business
@@ -350,6 +350,10 @@ class ProjectList(APIView):
                 serializer = ProjectSerializer(project)
                 response_data = serializer.data
                 response_data['business_name'] = project.business.name if project.business else None
+                # Calculate progression
+                total_tasks = Task.objects.filter(project=project).count()
+                done_tasks = Task.objects.filter(project=project, status='DONE').count()
+                response_data['progress'] = round((done_tasks / total_tasks) * 100, 1) if total_tasks > 0 else 0
                 return Response(response_data)
             except Project.DoesNotExist:
                 return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -357,7 +361,12 @@ class ProjectList(APIView):
             user_projects = UserProjectRole.objects.filter(user=request.user).values_list('project', flat=True)
             projects = Project.objects.filter(id__in=user_projects)
             serializer = ProjectSerializer(projects, many=True)
-        return Response(serializer.data)
+            response_data = serializer.data
+            for project in response_data:
+                total_tasks = Task.objects.filter(project_id=project['id']).count()
+                done_tasks = Task.objects.filter(project_id=project['id'], status='DONE').count()
+                project['progress'] = round((done_tasks / total_tasks) * 100, 1) if total_tasks > 0 else 0
+            return Response(response_data)
 
     def post(self, request):
         data = request.data.copy()
@@ -723,6 +732,11 @@ class UserProjects(APIView):
                 project_data = ProjectSerializer(upr.project).data
                 project_data['role_perm'] = upr.role.perm if upr.role else None
                 projects_data.append(project_data)
+
+            for project in projects_data:
+                total_tasks = Task.objects.filter(project_id=project['id']).count()
+                done_tasks = Task.objects.filter(project_id=project['id'], status='DONE').count()
+                project['progress'] = round((done_tasks / total_tasks) * 100, 1) if total_tasks > 0 else 0
             
             return Response(projects_data, status=status.HTTP_200_OK)
         except Exception as e:
